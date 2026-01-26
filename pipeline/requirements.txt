@@ -2,3 +2,5 @@ mssql-python
 python-dotenv
 pylint
 pytest
+mssql-python
+python-dotenv
