@@ -1,0 +1,72 @@
+on: 
+  push:
+    branches:
+    - main
+  pull_request:
+    branches: 
+    - main
+  workflow_dispatch:
+    
+jobs:
+  speak:
+    name: Speaking
+    runs-on: ubuntu-latest
+    steps:
+      - name: Speak
+        run: echo "Hello world"
+
+  test:
+    name: Testing langdale_zoo_api
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get repo
+      uses: actions/checkout@v6
+      with:
+        sparse-checkout: ./langdale_zoo_api
+
+    - name: Install Python
+      uses: actions/setup-python@v6
+
+    - name: Install libraries
+      run: pip install -r ./langdale_zoo_api/requirements.txt
+
+    - name: Run pytest
+      run: pytest
+
+      env:
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          DATABASE_IP: ${{ secrets.DATABASE_IP }}
+          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+
+    - name: Run pylint
+      run: pylint langdale_zoo_api/*.py --fail-under=8
+
+  deploy:
+    needs: test
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get repo
+      uses: actions/checkout@v6
+    
+    - name: Deploy langdale_zoo_api
+      uses: easingthemes/ssh-deploy@main
+      with:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SOURCE: ${{ secrets.SOURCE }}
+        REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+        REMOTE_USER: ${{ secrets.REMOTE_USER }}
+        TARGET: ${{ secrets.REMOTE_TARGET }}
+        SCRIPT_BEFORE: |
+          whoami
+          ls -al
+        SCRIPT_AFTER: |
+          whoami
+          ls -al
+          echo $RSYNC_STDOUT
+          pkill -f "app.py"
+          nohup python3 ./Coursework-Intro-to-Cloud-Week-1/langdale_zoo_api/app.py > app.log 2>&1 &
+    
+    
