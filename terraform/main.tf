@@ -44,6 +44,7 @@ data "aws_ecr_image" "lambda-image-archive" {
     repository_name = aws_ecr_repository.charn-archive-ecr.name
     image_tag       = "latest"
 }
+
 ##################################################
 
 
@@ -255,7 +256,7 @@ resource "aws_scheduler_schedule" "c21-charn-pipeline-schedule" {
     mode = "OFF"
   }
   
-  schedule_expression = "cron(* * * * *)"
+  schedule_expression = "cron(* * * * ? *)"
 
   target {
     arn = aws_lambda_function.charn-pipeline-lambda.arn
@@ -292,3 +293,4 @@ resource "aws_s3_bucket" "c21-charn-archive-bucket" {
 
   force_destroy = true
 }
+#################################################
