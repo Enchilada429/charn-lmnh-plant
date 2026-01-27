@@ -1,9 +1,11 @@
 """Script for uploading the cleaned data to the RDS (SQL Server)."""
 
-import pyodbc
-from os import environ as ENV
-from dotenv import load_dotenv
 import logging
+from os import environ as ENV
+
+import pyodbc
+from dotenv import load_dotenv
+
 from extract import extract_data
 from transform import transform_data
 
@@ -53,7 +55,7 @@ def upload_recording_to_database(conn, recording) -> None:
         curs.executemany(insert_query, recording_to_insert)
 
     conn.commit()
-    logging.info("Successfully inserted %d recording records.",
+    logging.info("Successfully inserted %d recording data.",
                  len(recording_to_insert))
 
 
