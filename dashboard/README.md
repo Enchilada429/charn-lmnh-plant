@@ -13,8 +13,6 @@ To run the dashboard, run the following command:
 streamlit run dashboard.py
 ```
 
-This will extract data from the plant API, clean the data, and upload the data to the RDS.
-
 
 ## Docker & Uploading Image to AWS ECR
 
