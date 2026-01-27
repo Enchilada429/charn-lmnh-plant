@@ -70,7 +70,7 @@ CREATE TABLE botanist (
 
 CREATE TABLE plant (
     plant_id SMALLINT IDENTITY(1,1) PRIMARY KEY,
-    plant_name VARCHAR(255) NOT NULL,
+    common_name VARCHAR(255) NOT NULL,
     scientific_name VARCHAR(255)
 );
 
