@@ -1,5 +1,5 @@
 """Script for cleaning and modifying the extracted data."""
-from extract import get_all_plants_data
+# from extract import get_all_plants_data
 import pandas as pd
 
 

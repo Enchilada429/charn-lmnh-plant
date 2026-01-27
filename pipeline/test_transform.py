@@ -5,7 +5,7 @@
 import pandas as pd
 from datetime import datetime
 
-from transform import build_dataframe, convert_datatypes
+from transform import build_dataframe, convert_datatypes, drop_outliers
 
 
 def test_build_dataframe_valid_columns(test_plant_data):
@@ -65,7 +65,7 @@ def test_build_dataframe_valid_df(test_plant_data):
 
 
 def test_convert_datatypes_valid():
-    test_df = pd.DataFrame({
+    test_df = pd.DataFrame(data={
         "latitude": ["-60.9363685"],
         "longitude": ["-152.763324"],
         "last_watered": ["2026-01-27T14:47:07"],
@@ -88,3 +88,10 @@ def test_convert_datatypes_valid():
         lambda val: isinstance(val, float)))
     assert all(converted_df["temperature"].map(
         lambda val: isinstance(val, float)))
+
+
+def test_drop_outliers_valid():
+    test_df = pd.DataFrame(data={
+        "soil_moisture": [0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 50.0],
+        "temperature": [0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 50.0]
+    })
