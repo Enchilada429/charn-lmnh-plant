@@ -93,6 +93,14 @@ venv/
 terraform.*
 *.tfvars
 *.tfstate
+.terraform.lock.hcl
+
+./terraform/.terraform
+./terraform/terraform.*
+./terraform/*.tfvars
+./terraform/*.tfstate
+./terraform/.terraform.lock.hcl
+
 
 .venv
 
