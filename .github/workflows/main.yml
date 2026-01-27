@@ -8,13 +8,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  speak:
-    name: Speaking
-    runs-on: ubuntu-latest
-    steps:
-      - name: Speak
-        run: echo "Hello world"
-
   test:
     name: test and lint
     runs-on: ubuntu-latest
@@ -33,7 +26,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r pipeline/requirements.txt
 
-      - name: Run pytest that wont fail
+      - name: Run pytest (won't fail workflow)
         continue-on-error: true
         run: pytest -q
 
