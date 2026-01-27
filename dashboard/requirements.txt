@@ -4,3 +4,5 @@ pandas
 altair
 streamlit
 streamlit-autorefresh
+pyodbc
+python-dotenv
