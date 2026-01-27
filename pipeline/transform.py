@@ -3,9 +3,6 @@ from extract import get_all_plants_data
 import pandas as pd
 
 
-import pandas as pd
-
-
 def transform_data(records: list[dict]) -> pd.DataFrame:
     """Return pandas dataframe from a list of dictionaries containing plant data"""
     rows = []
