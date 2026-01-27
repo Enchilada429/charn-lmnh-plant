@@ -262,5 +262,21 @@ resource "aws_scheduler_schedule" "c21-charn-pipeline-schedule" {
     role_arn = aws_iam_role.eventbridge-pipeline-scheduler-role.arn
   }
 }
+
+# Eventbridge daily pipeline schedule
+resource "aws_scheduler_schedule" "c21-charn-pipeline-schedule" {
+  name = "c21-charn-pipeline-schedule"
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+  
+  schedule_expression = "cron(* * * * *)"
+
+  target {
+    arn = aws_lambda_function.charn-pipeline-lambda.arn
+    role_arn = aws_iam_role.eventbridge-pipeline-scheduler-role.arn
+  }
+}
 #############################################################
 
