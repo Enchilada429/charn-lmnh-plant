@@ -4,10 +4,15 @@ import pyodbc
 from os import environ as ENV
 from dotenv import load_dotenv
 import logging
-from pyodbc import execute_values
+from extract import extract_data
+from transform import transform_data
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 def handler(event=None, context=None):
+    """Create and return a SQL Server connection."""
     conn_str = (
         f"DRIVER={{{ENV['DB_DRIVER']}}};"
         f"SERVER={ENV['DB_HOST']},{ENV['DB_PORT']};"
@@ -17,18 +22,11 @@ def handler(event=None, context=None):
         f"Encrypt=no;"
     )
 
+    logging.info("Connecting to SQL Server")
     conn = pyodbc.connect(conn_str)
+    logging.info("Connection established")
 
-    with conn.cursor() as cur:
-        q = """
-        
-        """
-        cur.execute(q)
-        data = cur.fetchall()
-
-    conn.close()
-
-    return
+    return conn
 
 
 def upload_recording_to_database(conn, recording) -> None:
@@ -38,21 +36,35 @@ def upload_recording_to_database(conn, recording) -> None:
     recording_to_insert = []
     for _, row in recording.iterrows():
         recording_to_insert.append(
-            (row["plant_id"], row["botanist_id"], row["origin_location_id"], row["last_watered"], row["image_id"], row["recording_taken"], row["soil_moisture"], row["temperature"]))
-    insert_query = """INSERT INTO recording (plant_id, botanist_id, origin_location_id, last_watered, image_id, recording_taken, soil_moisture, temperature)
-                        VALUES ?;"""
+            (
+                row["plant_id"], row["botanist_id"], row["origin_location_id"], row["last_watered"], row[
+                    "image_id"], row["recording_taken"], row["soil_moisture"], row["temperature"],
+            )
+        )
+
+    insert_query = """INSERT INTO recording (plant_id, botanist_id, origin_location_id, last_watered,
+        image_id, recording_taken, soil_moisture, temperature
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    """
+
     with conn.cursor() as curs:
-        execute_values(curs, insert_query, (recording_to_insert,))
+        curs.fast_executemany = True
+        curs.executemany(insert_query, recording_to_insert)
+
     conn.commit()
-    logging.info(
-        "Successfully inserted %d rating records.",
-        len(recording_to_insert)
-    )
-    logging.info(
-        "Successfully inserted rows."
-    )
+    logging.info("Successfully inserted %d recording records.",
+                 len(recording_to_insert))
 
 
 if __name__ == "__main__":
     load_dotenv()
-    print(handler())
+
+    data = extract_data()
+    df_transformed = transform_data(data)
+
+    conn = handler()
+    try:
+        upload_recording_to_database(conn, df_transformed)
+    finally:
+        conn.close()
