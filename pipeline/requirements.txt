@@ -1,2 +1,4 @@
 mssql-python
 python-dotenv
+pylint
+pytest
