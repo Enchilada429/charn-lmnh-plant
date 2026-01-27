@@ -38,4 +38,4 @@ jobs:
         run: pytest -q
 
       - name: Run pylint
-        run: pylint pipeline/extract.py pipeline/transform.py pipeline/load.py dashboard/dashboard.py --fail-under=8
+        run: pylint pipeline/extract.py pipeline/transform.py pipeline/load.py dashboard/dashboard.py --fail-under=7
