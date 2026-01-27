@@ -1,22 +1,24 @@
 """Script for extracting data from the API."""
 
-from os import environ as ENV, _Environ
-
-from dotenv import load_dotenv
-from mssql_python import connect, Connection
+import pandas as pd
+from requests import get
 
 
-def get_db_connection(config: _Environ) -> Connection:
-    """Returns a connection the SQL Server database."""
+PLANT_ENDPOINT = "https://tools.sigmalabs.co.uk/api/plants/"
 
-    return connect(
-        f"Server={config["SERVER_NAME"]};Database=" + "{" + config["DATABASE_NAME"] + "}" +
-        ";Encrypt=yes;TrustServerCertificate=no;Authentication=ActiveDirectoryInteractive"
-    )
+
+def get_api_plant_data(id: int) -> dict:
+    """Returns the data as a dict on a single plant using its id."""
+
+    return get(PLANT_ENDPOINT + id).json()
+
+
+def extract_data_as_df() -> pd.DataFrame:
+    """Extracts plant information from the API"""
+
+    ...
 
 
 if __name__ == "__main__":
 
-    load_dotenv()
-
-    conn = get_db_connection(ENV)
+    print(get_api_plant_data(1))

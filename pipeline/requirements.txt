@@ -4,3 +4,5 @@ pylint
 pytest
 mssql-python
 python-dotenv
+pandas
+requests
