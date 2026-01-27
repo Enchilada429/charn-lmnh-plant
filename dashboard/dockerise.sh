@@ -6,7 +6,7 @@ read -p 'AWS ECR Name: ' AWS_ECR_REPO
 
 aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 
-docker build -t ${AWS_ECR_REPO} --platform="linux/amd64" --provenance=false .
+docker build -t ${AWS_ECR_REPO} . --platform "linux/amd64" --provenance=false
 
 docker tag ${AWS_ECR_REPO}:latest ${AWS_ECR_REPO}.dkr.ecr.${AWS_REGION}.amazonaws.com/${AWS_ECR_REPO}:latest
 
