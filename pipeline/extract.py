@@ -43,10 +43,17 @@ async def get_all_plants_data(batch_processing_size: int) -> list[dict]:
     return plants_data
 
 
-if __name__ == "__main__":
+def extract() -> list[dict]:
+    """Extracts all data from the API. Takes care of async requests."""
 
     start_time = time()
 
-    print(asyncio.run(get_all_plants_data(batch_processing_size=20)))
+    data = asyncio.run(get_all_plants_data(batch_processing_size=20))
 
-    print(f"Total time taken: {time() - start_time} seconds")
+    print(f"Total extraction time: {time() - start_time} seconds")
+
+    return data
+
+
+if __name__ == "__main__":
+    extract()
