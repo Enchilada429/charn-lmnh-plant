@@ -264,19 +264,29 @@ resource "aws_scheduler_schedule" "c21-charn-pipeline-schedule" {
 }
 
 # Eventbridge daily pipeline schedule
-resource "aws_scheduler_schedule" "c21-charn-pipeline-schedule" {
-  name = "c21-charn-pipeline-schedule"
+resource "aws_scheduler_schedule" "c21-charn-archive-schedule" {
+  name = "c21-charn-archive-schedule"
 
   flexible_time_window {
     mode = "OFF"
   }
   
-  schedule_expression = "cron(* * * * *)"
+  schedule_expression = "cron(0 18 * * *)"
 
   target {
-    arn = aws_lambda_function.charn-pipeline-lambda.arn
-    role_arn = aws_iam_role.eventbridge-pipeline-scheduler-role.arn
+    arn = aws_lambda_function.charn-archive-lambda.arn
+    role_arn = aws_iam_role.eventbridge-archive-scheduler-role.arn
   }
 }
 #############################################################
 
+
+################### s3 Bucket ###################
+
+resource "aws_s3_bucket" "c21-charn-archive-bucket" {
+  bucket = "c21-charn-archive-bucket"
+
+  tags = {
+    Name = "c21-charn-archive-bucket"
+  }
+}
