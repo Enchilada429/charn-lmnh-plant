@@ -9,7 +9,7 @@ PLANT_ENDPOINT = "https://tools.sigmalabs.co.uk/api/plants/"
 
 
 async def get_plant_data(session: aiohttp.ClientSession, id: int) -> dict:
-    """Returns the data as a dict on a single plant using its id via the API."""
+    """Returns a single plant's data using its id. Requires a session object."""
 
     async with session.get(PLANT_ENDPOINT + str(id)) as response:
         data = await response.json()
@@ -44,7 +44,7 @@ async def get_all_plants_data(batch_processing_size: int) -> list[dict]:
 
 
 def extract() -> list[dict]:
-    """Extracts all data from the API. Takes care of async requests."""
+    """Extracts all data from the API and returns it. Takes care of async requests."""
 
     start_time = time()
 
