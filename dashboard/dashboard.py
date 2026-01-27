@@ -17,6 +17,8 @@ st.title(" 🌱 LMNH Plant Monitoring Dashboard ")
 
 st.subheader(" Alerts 🥀")
 
+
+
 st.sidebar.header("Controls")
 st.sidebar.header("Data Archive")
 
