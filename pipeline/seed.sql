@@ -58,3 +58,17 @@ WHERE NOT EXISTS (
     FROM country co 
     WHERE co.country_name = c.country_name
 );
+
+INSERT INTO origin_location (origin_city_name, longitude, latitude)
+SELECT DISTINCT
+    c.origin_city,
+    c.longitude,
+    c.latitude
+FROM cleaned_data c 
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM origin_location ol 
+    WHERE ol.longitude = c.longitude AND ol.latitude = c.latitude
+);
+
+--
