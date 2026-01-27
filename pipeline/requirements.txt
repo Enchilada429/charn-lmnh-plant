@@ -1,5 +1,8 @@
+mssql-python
+python-dotenv
 pylint
 pytest
 pandas
+aiohttp
+asyncio
 requests
-logging
