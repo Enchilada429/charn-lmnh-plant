@@ -7,8 +7,9 @@ provider "aws" {
 }   
 
 
-## ECR for the pipeline lambda function
+################### ECR repositories ###################
 
+# repo for the pipeline lambda function
 resource "aws_ecr_repository" "charn-pipeline-ecr" {
   name                 = "c21-charn-pipeline-ecr"
   image_tag_mutability = "MUTABLE"
@@ -18,13 +19,35 @@ resource "aws_ecr_repository" "charn-pipeline-ecr" {
   }
 }
 
-# references the ecr image which should be pushed to the repository
-data "aws_ecr_image" "lambda-image-version" {
+# repo for the archive lambda function
+resource "aws_ecr_repository" "charn-archive-ecr" {
+  name                 = "c21-charn-archive-ecr"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+########################################################
+
+
+################### ECR Images ###################
+
+# references the pipeline ecr image which should be pushed to the repository
+data "aws_ecr_image" "lambda-image-pipeline" {
   repository_name = aws_ecr_repository.charn-pipeline-ecr.name
   image_tag       = "latest"
 }
 
-# Permissions etc. for the Lambda
+# references the archive ecr image
+data "aws_ecr_image" "lambda-image-archive" {
+    repository_name = aws_ecr_repository.charn-archive-ecr.name
+    image_tag       = "latest"
+}
+##################################################
+
+
+################### Policy Documents ###################
 
 # Trust doc (who is allowed to use this)
 data "aws_iam_policy_document" "lambda-role-trust-policy-doc" {
@@ -40,7 +63,8 @@ data "aws_iam_policy_document" "lambda-role-trust-policy-doc" {
   }
 }
 
-data "aws_iam_policy_document" "lambda-role-permissions-policy-doc" {
+# RDS permissions policy document
+data "aws_iam_policy_document" "lambda-role-permissions-policy-doc-pipeline" {
   statement {
     effect = "Allow"
     actions = [
@@ -60,35 +84,67 @@ data "aws_iam_policy_document" "lambda-role-permissions-policy-doc" {
   }
 }
 
-# Role (thing that can be assumed to get power)
+# RDS and s3 permissions policy document
+data "aws_iam_policy_document" "lambda-role-permissions-policy-doc-archive" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+    resources = ["arn:aws:logs:eu-west-2:129033205317:*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "rds:*"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:*"
+    ]
+    resources = ["*"]
+  }
+}
+######################################################
+
+
+################### Policies ###################
+
+# Permissions policy
+resource "aws_iam_policy" "lambda-role-permissions-policy-pipeline" {
+  name   = "c21-charn-pipeline-permissions-policy"
+  policy = data.aws_iam_policy_document.lambda-role-permissions-policy-doc-pipeline.json
+}
+
+resource "aws_iam_policy" "lambda-role-permissions-policy-archive" {
+  name   = "c21-charn-archive-permissions-policy"
+  policy = data.aws_iam_policy_document.lambda-role-permissions-policy-doc-archive.json
+}
+################################################
+
+
+################### Roles ###################
+
+# minutely pipeline lambda role
 resource "aws_iam_role" "lambda-minute-role" {
   name               = "c21-charn-pipeline-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda-role-trust-policy-doc.json
 }
 
-# Permissions policy
-resource "aws_iam_policy" "lambda-role-permissions-policy" {
-  name   = "c21-charn-pipeline-permissions-policy"
-  policy = data.aws_iam_policy_document.lambda-role-permissions-policy-doc.json
+# daily archive lambda role
+resource "aws_iam_role" "lambda-daily-role" {
+  name               = "c21-charn-archive-lambda-role"
+  assume_role_policy = data.aws_iam_policy_document.lambda-role-trust-policy-doc.json
 }
 
-# Connect the policy to the role
-resource "aws_iam_role_policy_attachment" "lambda-role-policy-connection" {
-  role       = aws_iam_role.lambda-minute-role.name
-  policy_arn = aws_iam_policy.lambda-role-permissions-policy.arn
-}
-
-resource "aws_lambda_function" "charn-pipeline-lambda" {
-  function_name = "c21-charn-pipeline"
-  role          = aws_iam_role.lambda-minute-role.arn
-  package_type  = "Image"
-  image_uri     = data.aws_ecr_image.lambda-image-version.image_uri
-  timeout       = 300
-  memory_size   = 512
-}
-
-
-# eventbridge scheduler role
+# eventbridge minutely pipeline scheduler role
 resource "aws_iam_role" "eventbridge-pipeline-scheduler-role" {
   name = "c21-charn-pipeline-scheduler-role"
 
@@ -104,8 +160,42 @@ resource "aws_iam_role" "eventbridge-pipeline-scheduler-role" {
   })
 }
 
+# eventbridge daily archive scheduler role
+resource "aws_iam_role" "eventbridge-archive-scheduler-role" {
+  name = "c21-charn-archive-scheduler-role"
 
-# eventbridge iam role policy
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+        Effect = "Allow"
+        Principal = {
+            Service = "scheduler.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+    }]
+  })
+}
+#############################################
+
+
+################### Role-Policy Attachments ###################
+# Connect the pipeline policy to the pipeline role
+resource "aws_iam_role_policy_attachment" "lambda-pipeline-role-policy-connection" {
+  role       = aws_iam_role.lambda-minute-role.name
+  policy_arn = aws_iam_policy.lambda-role-permissions-policy-pipeline.arn
+}
+
+# Connect the archive policy to the archive role
+resource "aws_iam_role_policy_attachment" "lambda-archive-role-policy-connection" {
+  role       = aws_iam_role.lambda-daily-role.name
+  policy_arn = aws_iam_policy.lambda-role-permissions-policy-archive.arn
+}
+###############################################################
+
+
+################### Role Policies ###################
+
+# eventbridge pipeline iam role policy
 resource "aws_iam_role_policy" "eventbridge-pipeline-role" {
   policy = jsonencode({
     Statement = [{
@@ -117,8 +207,47 @@ resource "aws_iam_role_policy" "eventbridge-pipeline-role" {
   role = aws_iam_role.eventbridge-pipeline-scheduler-role.id
 }
 
+# eventbridge archive iam role policy
+resource "aws_iam_role_policy" "eventbridge-archive-role" {
+  policy = jsonencode({
+    Statement = [{
+        Action = "lambda:InvokeFunction"
+        Effect = "Allow"
+        Resource = aws_lambda_function.charn-archive-lambda.arn
+    }]
+  })
+  role = aws_iam_role.eventbridge-pipeline-scheduler-role.id
+}
+#####################################################
 
-# Eventbridge minute schedule
+
+################### Lambda Functions ###################
+
+# minutely pipeline lambda function
+resource "aws_lambda_function" "charn-pipeline-lambda" {
+  function_name = "c21-charn-pipeline"
+  role          = aws_iam_role.lambda-minute-role.arn
+  package_type  = "Image"
+  image_uri     = data.aws_ecr_image.lambda-image-pipeline.image_uri
+  timeout       = 300
+  memory_size   = 512
+}
+
+# daily lambda archive function
+resource "aws_lambda_function" "charn-archive-lambda" {
+  function_name = "c21-charn-archive"
+  role          = aws_iam_role.lambda-daily-role.arn
+  package_type  = "Image"
+  image_uri     = data.aws_ecr_image.lambda-image-archive.image_uri
+  timeout       = 300
+  memory_size   = 512
+}
+########################################################
+
+
+################### Eventbridge Schedules ###################
+
+# Eventbridge minutely pipeline schedule
 resource "aws_scheduler_schedule" "c21-charn-pipeline-schedule" {
   name = "c21-charn-pipeline-schedule"
 
@@ -133,5 +262,5 @@ resource "aws_scheduler_schedule" "c21-charn-pipeline-schedule" {
     role_arn = aws_iam_role.eventbridge-pipeline-scheduler-role.arn
   }
 }
-
+#############################################################
 
