@@ -1,12 +1,9 @@
 """Script for extracting data from the API."""
 
-from requests import get
-from logging import getLogger, INFO
-
 import aiohttp
 import asyncio
 
-logger = getLogger(__name__)
+from time import time
 
 PLANT_ENDPOINT = "https://tools.sigmalabs.co.uk/api/plants/"
 
@@ -19,23 +16,37 @@ async def get_plant_data(session: aiohttp.ClientSession, id: int) -> dict:
         return data
 
 
-async def get_all_plants_data() -> list[dict]:
+async def get_all_plants_data(batch_processing_size: int) -> list[dict]:
     """Returns the data on all plants via the API.
-    Only stops when meeting 20 consecutive errors in data in a row."""
+    Only stops when meeting consecutive errors dictated by batch processing size argument."""
 
-    logger.info("Retrieving data on all plants.")
+    plants_data = []
+    plants_left = True
+    id_counter = 1
 
     async with aiohttp.ClientSession() as session:
-        tasks = [get_plant_data(session, id) for id in range(50)]
-        results = await asyncio.gather(*tasks)
+        while plants_left:
+            tasks = [get_plant_data(session, id)
+                     for id in range(id_counter, id_counter + batch_processing_size)]
 
-    logger.info("Finished retrieving data on all plants.")
+            results = await asyncio.gather(*tasks)
 
-    return results
+            errorless_results = [
+                result for result in results if "error" not in result.keys()]
+
+            if len(errorless_results) == 0:
+                plants_left = False
+            else:
+                plants_data.extend(errorless_results)
+                id_counter += batch_processing_size
+
+    return plants_data
 
 
 if __name__ == "__main__":
 
-    logger.setLevel(INFO)
+    start_time = time()
 
-    print(asyncio.run(get_all_plants_data()))
+    print(asyncio.run(get_all_plants_data(batch_processing_size=20)))
+
+    print(f"Total time taken: {time() - start_time} seconds")
