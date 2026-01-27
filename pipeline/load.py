@@ -57,6 +57,7 @@ def upload_recording_to_database(conn, recording) -> None:
                  len(recording_to_insert))
 
 
+
 if __name__ == "__main__":
     load_dotenv()
 
