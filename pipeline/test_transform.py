@@ -95,3 +95,10 @@ def test_drop_outliers_valid():
         "soil_moisture": [0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 50.0],
         "temperature": [0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 50.0]
     })
+
+    no_outlier_df = drop_outliers(test_df)
+
+    difference_df = pd.concat(
+        [test_df.head(10), no_outlier_df]).drop_duplicates(keep=False)
+
+    assert difference_df.empty
