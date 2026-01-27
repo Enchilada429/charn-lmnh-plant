@@ -6,4 +6,3 @@ pandas
 aiohttp
 asyncio
 requests
-logging
