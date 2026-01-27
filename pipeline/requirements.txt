@@ -3,6 +3,8 @@ python-dotenv
 pylint
 pytest
 pandas
+load-dotenv
+pyodbc
 aiohttp
 asyncio
 requests
