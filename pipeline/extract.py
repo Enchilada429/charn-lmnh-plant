@@ -1,9 +1,12 @@
 """Script for extracting data from the API."""
 
+from time import perf_counter
+from logging import getLogger, basicConfig, INFO
+
 import aiohttp
 import asyncio
 
-from time import time
+logger = getLogger(__name__)
 
 PLANT_ENDPOINT = "https://tools.sigmalabs.co.uk/api/plants/"
 
@@ -24,6 +27,8 @@ async def get_all_plants_data(batch_processing_size: int) -> list[dict]:
     plants_left = True
     id_counter = 1
 
+    logger.info("Retrieving all plants data.")
+
     async with aiohttp.ClientSession() as session:
         while plants_left:
             tasks = [get_plant_data(session, id)
@@ -40,17 +45,24 @@ async def get_all_plants_data(batch_processing_size: int) -> list[dict]:
                 plants_data.extend(errorless_results)
                 id_counter += batch_processing_size
 
+    logger.info("Retrieved all plants data.")
+
     return plants_data
 
 
 def extract() -> list[dict]:
     """Extracts all data from the API and returns it. Takes care of async requests."""
 
-    start_time = time()
+    basicConfig(level=INFO)
+
+    logger.info("Extraction started.")
+
+    start_time = perf_counter()
 
     data = asyncio.run(get_all_plants_data(batch_processing_size=20))
 
-    print(f"Total extraction time: {time() - start_time} seconds")
+    logger.info(
+        f"Extraction finished with time taken: {perf_counter() - start_time} seconds.")
 
     return data
 
