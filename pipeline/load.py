@@ -31,10 +31,6 @@ def handler(event=None, context=None):
     return
 
 
-def check_plant_table(conn, ):
-    ...
-
-
 def upload_recording_to_database(conn, recording) -> None:
     """Uploads formatted recording data to the DB."""
     logging.info("Starting upload of %d recording", len(recording))
