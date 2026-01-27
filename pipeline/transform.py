@@ -81,4 +81,4 @@ if __name__ == "__main__":
     data = get_all_plants_data()
     df_transformed = transform_data(data)
 
-    print(df_transformed.head(50))
+    df_transformed.to_csv("cleaned_data.csv")
