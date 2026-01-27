@@ -289,4 +289,6 @@ resource "aws_s3_bucket" "c21-charn-archive-bucket" {
   tags = {
     Name = "c21-charn-archive-bucket"
   }
+
+  force_destroy = true
 }
