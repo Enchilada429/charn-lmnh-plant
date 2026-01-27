@@ -1,7 +1,7 @@
 # provider
 
 provider "aws" {
-    region     = "eu-west-2"
+  region     = var.AWS_DEFAULT_REGION
   secret_key = var.AWS_SECRET_ACCESS_KEY
   access_key = var.AWS_ACCESS_KEY_ID
 }   
