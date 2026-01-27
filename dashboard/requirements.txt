@@ -1,0 +1,6 @@
+pylint
+pytest
+pandas
+altair
+streamlit
+streamlit-autorefresh
