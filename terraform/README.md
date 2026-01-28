@@ -3,14 +3,8 @@
 ## setup
 To begin, move into the *terraform* directory with `cd terraform` \
 Then, create a file to hold the secret variables in, called `terraform.tfvars`, using the command: `touch terraform.tfvars`
-Inside this file, create 5 variables:
-    - AWS_DEFAULT_REGION    = \[THE REGION OF CHOICE\]
-    - AWS_ACCESS_KEY_ID     = \[YOUR AWS ACCESS KEY ID HERE\]
-    - AWS_SECRET_ACCESS_KEY = \[YOUR SECRET AWS KEY HERE\]
-    - VPC_ID                = \[YOUR VPC OF CHOICE HERE\]
-    - CLUSTER_NAME          = \[YOUR CLUSTER NAME HERE\]
+Inside this file, create 5 variables in this form:
 
-In this form:
 ```
 AWS_DEFAULT_REGION    = "<THE REGION OF CHOICE>"
 AWS_ACCESS_KEY_ID     = "<YOUR AWS ACCESS KEY ID HERE>"
