@@ -109,4 +109,7 @@ terraform.*
 
 *.parquet
 
+pipeline/*.csv
+dashboard/*.csv
+archive/*.csv
 *.csv
