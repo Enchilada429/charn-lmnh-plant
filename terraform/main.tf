@@ -6,6 +6,30 @@ provider "aws" {
   access_key = var.AWS_ACCESS_KEY_ID
 }   
 
+################### VPC ###################
+
+# cohort 21 vpc
+data "aws_vpc" "cohort-vpc" {
+    id = var.VPC_ID
+}
+###########################################
+
+
+################### Subnets ###################
+
+data "aws_subnets" "public-subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.cohort-vpc.id]
+  }
+
+  filter {
+    name   = "tag:Tier"
+    values = ["public"]
+  }
+}
+###############################################
+
 
 ################### ECR repositories ###################
 
@@ -28,7 +52,25 @@ resource "aws_ecr_repository" "charn-archive-ecr" {
     scan_on_push = true
   }
 }
+
+# repo for the dashboard ecs service
+resource "aws_ecr_repository" "charn-dashboard-ecr" {
+  name                 = "c21-charn-dashboard-ecr"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
 ########################################################
+
+
+################### ECS Cluster ###################
+
+data "aws_ecs_cluster" "c21-cluster" {
+  cluster_name = var.CLUSTER_NAME
+}
+###################################################
 
 
 ################### ECR Images ###################
@@ -45,10 +87,55 @@ data "aws_ecr_image" "lambda-image-archive" {
     image_tag       = "latest"
 }
 
-##################################################
+# references the ecs-image-dashboard
+data "aws_ecr_image" "ecs-image-dashboard" {
+    repository_name = aws_ecr_repository.charn-dashboard-ecr.name
+    image_tag =  "latest"
+}
+
+################################################## 
 
 
-################### Policy Documents ###################
+################### Load Balancer / Listener ################### 
+
+# load balancer for ECS dashboard service
+resource "aws_lb" "c21-charn-ecs-load-balancer" {
+  name = "c21-charn-ecs-load-balancer"
+  internal = false
+  load_balancer_type = "application"
+  subnets = data.aws_subnets.public-subnets.ids
+  
+  
+}
+
+# listener for load balancer
+resource "aws_lb_listener" "c21-charn-lb-listener" {
+  load_balancer_arn = aws_lb.c21-charn-ecs-load-balancer.arn
+  port = 8501
+  protocol = "HTTP"
+
+  default_action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.c21-charn-target-group.id
+  }
+}
+##################################################### 
+
+
+################### LB Target Group ################### 
+
+# target group for the load balancer
+resource "aws_lb_target_group" "c21-charn-target-group" {
+  name = "c21-charn-target-group"
+  port = 8501
+  protocol = "HTTP"
+  target_type = "ip"
+  vpc_id = data.aws_vpc.cohort-vpc.id
+}
+######################################################## 
+
+
+################### Policy Documents ################### 
 
 # Trust doc (who is allowed to use this)
 data "aws_iam_policy_document" "lambda-role-trust-policy-doc" {
@@ -113,7 +200,24 @@ data "aws_iam_policy_document" "lambda-role-permissions-policy-doc-archive" {
     resources = ["*"]
   }
 }
-######################################################
+
+# ECR permissions for policy document
+data "aws_iam_policy_document" "ecs-role-permissions-policy-doc-dashboard" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = ["*"]
+  }
+
+}
+###################################################### 
 
 
 ################### Policies ###################
@@ -128,10 +232,15 @@ resource "aws_iam_policy" "lambda-role-permissions-policy-archive" {
   name   = "c21-charn-archive-permissions-policy"
   policy = data.aws_iam_policy_document.lambda-role-permissions-policy-doc-archive.json
 }
-################################################
+
+resource "aws_iam_policy" "task-definition-role-permissions-policy-dashboard" {
+  name   = "c21-charn-dashboard-permissions-policy"
+  policy = data.aws_iam_policy_document.ecs-role-permissions-policy-doc-dashboard.json
+}
+################################################ 
 
 
-################### Roles ###################
+################### Roles ################### 
 
 # minutely pipeline lambda role
 resource "aws_iam_role" "lambda-minute-role" {
@@ -176,10 +285,43 @@ resource "aws_iam_role" "eventbridge-archive-scheduler-role" {
     }]
   })
 }
+
+# ecs execution dashboard role
+resource "aws_iam_role" "ecs-execution-dashboard-role" {
+  name = "c21-charn-ecs-execution-dashboard-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+        Effect = "Allow"
+        Principal = {
+            Service = "ecs-tasks.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+# ecs task definition role
+resource "aws_iam_role" "ecs-task-definition-role-dashboard" {
+  name = "c21-charn-ecs-task-definition-role-dashboard"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
 #############################################
 
 
-################### Role-Policy Attachments ###################
+################### Role-Policy Attachments ################### 
+
 # Connect the pipeline policy to the pipeline role
 resource "aws_iam_role_policy_attachment" "lambda-pipeline-role-policy-connection" {
   role       = aws_iam_role.lambda-minute-role.name
@@ -191,10 +333,16 @@ resource "aws_iam_role_policy_attachment" "lambda-archive-role-policy-connection
   role       = aws_iam_role.lambda-daily-role.name
   policy_arn = aws_iam_policy.lambda-role-permissions-policy-archive.arn
 }
-###############################################################
+
+# Connect the task definition policy to the ecs role
+resource "aws_iam_role_policy_attachment" "ecs-execution-dashboard-role-policy-connection" {
+  role       = aws_iam_role.ecs-execution-dashboard-role.name
+  policy_arn = aws_iam_policy.task-definition-role-permissions-policy-dashboard.arn
+}
+############################################################### 
 
 
-################### Role Policies ###################
+################### Role Policies ################### 
 
 # eventbridge pipeline iam role policy
 resource "aws_iam_role_policy" "eventbridge-pipeline-role" {
@@ -217,12 +365,70 @@ resource "aws_iam_role_policy" "eventbridge-archive-role" {
         Resource = aws_lambda_function.charn-archive-lambda.arn
     }]
   })
-  role = aws_iam_role.eventbridge-pipeline-scheduler-role.id
+  role = aws_iam_role.eventbridge-archive-scheduler-role.id
 }
-#####################################################
+##################################################### 
 
 
-################### Lambda Functions ###################
+################### ECS Task Definition ################### 
+
+# ecs dashboard task definition
+resource "aws_ecs_task_definition" "ecs-dashboard-task-definition" {
+  family = "c21-charn-dashboard-task-definition"
+  requires_compatibilities = ["FARGATE"]
+  execution_role_arn = aws_iam_role.ecs-execution-dashboard-role.arn
+  task_role_arn = aws_iam_role.ecs-task-definition-role-dashboard.arn
+  network_mode = "awsvpc"
+  cpu = 1024
+  memory = 2048
+  container_definitions = jsonencode([
+    {
+        name = "c21-charn-dashboard-container"
+        image = data.aws_ecr_image.ecs-image-dashboard.image_uri
+        cpu = 1024
+        memory = 2048
+        essential = true
+        portMappings = [
+            {
+                containerPort = 8501
+                hostPort = 8501
+            }
+        ]
+    }
+  ])
+}
+############################################################ 
+
+
+################### ECS Service ################### 
+
+# dashboard service
+resource "aws_ecs_service" "ecs-dashboard-service" {
+  name                               = "c21-charn-dashboard-service"
+  cluster                            = data.aws_ecs_cluster.c21-cluster.id
+  task_definition                    = aws_ecs_task_definition.ecs-dashboard-task-definition.arn
+  launch_type                        = "FARGATE"
+  platform_version                   = "LATEST"
+  desired_count                      = 1
+  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 0
+  depends_on                         = [aws_lb_listener.c21-charn-lb-listener]
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.c21-charn-target-group.arn
+    container_name = "c21-charn-dashboard-container"
+    container_port = 8501
+  }
+
+  network_configuration {
+    subnets = data.aws_subnets.public-subnets.ids
+    assign_public_ip = true
+  }
+}
+#################################################### 
+
+
+################### Lambda Functions ################### 
 
 # minutely pipeline lambda function
 resource "aws_lambda_function" "charn-pipeline-lambda" {
@@ -243,10 +449,10 @@ resource "aws_lambda_function" "charn-archive-lambda" {
   timeout       = 300
   memory_size   = 512
 }
-########################################################
+######################################################## 
 
 
-################### Eventbridge Schedules ###################
+################### Eventbridge Schedules ################### 
 
 # Eventbridge minutely pipeline schedule
 resource "aws_scheduler_schedule" "c21-charn-pipeline-schedule" {
@@ -272,14 +478,14 @@ resource "aws_scheduler_schedule" "c21-charn-archive-schedule" {
     mode = "OFF"
   }
   
-  schedule_expression = "cron(0 18 * * *)"
+  schedule_expression = "cron(59 23 * * ? *)"
 
   target {
     arn = aws_lambda_function.charn-archive-lambda.arn
     role_arn = aws_iam_role.eventbridge-archive-scheduler-role.arn
   }
 }
-#############################################################
+############################################################# 
 
 
 ################### s3 Bucket ###################

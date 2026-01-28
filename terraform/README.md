@@ -2,27 +2,49 @@
 
 ## setup
 To begin, move into the *terraform* directory with `cd terraform` \
-Then, create a file to hold the secret variables in, called `terraform.tfvars`.
-Inside this file, create 3 variables:
-    - AWS_DEFAULT_REGION = \[THE REGION OF CHOICE\]
-    - AWS_ACCESS_KEY_ID = \[YOUR AWS ACCESS KEY ID HERE\]
+Then, create a file to hold the secret variables in, called `terraform.tfvars`, using the command: `touch terraform.tfvars`
+Inside this file, create 5 variables:
+    - AWS_DEFAULT_REGION    = \[THE REGION OF CHOICE\]
+    - AWS_ACCESS_KEY_ID     = \[YOUR AWS ACCESS KEY ID HERE\]
     - AWS_SECRET_ACCESS_KEY = \[YOUR SECRET AWS KEY HERE\]
+    - VPC_ID                = \[YOUR VPC OF CHOICE HERE\]
+    - CLUSTER_NAME          = \[YOUR CLUSTER NAME HERE\]
 
 Next, run the following commands in the following order:
 
 1. `terraform init` - This initialises the directory for terraform usage.
-2. `terraform plan` - This is a check to see that the terraform will not run into any issues, and give an overview of the resources it will create/change.
-3. `terraform apply` -> `yes` - This applies the changes and begins to create the resources described
+2. `terraform plan` - This is a check to see that the terraform will not run into any issues, and give an overview of the resources it will create/change. If this is the first time terraform has been run, you should see an error which states that it could not find a specific resource on a specific repository. This is because the docker images that exist in the local repository needed an ECR repository to exist to be pushed to. Running the next command should create these repositories and then fail.
+3. `terraform apply` -> `yes` - This applies the changes and begins to create the resources described.
 4. *Important info:* The previous command should fail. This is because if terraform has not yet been ran, and no resources exist on the cloud yet, the terraform code which references the ECR repository will as of now reference nothing. To fix this, you will need to push the relevant images to the respective ECR repositories so they can be referenced.
-5. `terraform apply` -> `yes` - If all goes well, this should run fine, creating the desired resources.
+5. *Push relevant images* - As described before, run each of the 3 dockerfile bash scripts to push the images to the correct repositories.
+6. `terraform apply` -> `yes` - If all goes well, this should run fine, creating the desired resources.
 
 ## List of terraform resources main.tf will create:
 - aws_ecr_repository | charn-pipeline-repo: The ECR repository for the pipeline container.
+- aws_ecr_repository | charn-archive-repo: The ECR repository for the archive container.
+- aws_ecr_repository | charn-dashboard-repo: The ECR repository for the dashboard container.
+- aws_lb | c21-charn-ecs-load-balancer: The load balancer which directs traffic to the dashboard hosted on the ECS Service.
+- aws_lb_listener | c21-charn-lb-listener: The load balancer listener which listens for traffic and forwards to the load balancer.
+- aws_lb_target_group | c21-charn-target-group: The target group for the load balancer.
+- aws_iam_policy | lambda-role-permissions-policy-pipeline: The policy allowing the lambda function full access to RDS.
+- aws_iam_policy | lambda-role-permissions-policy-archive: The policy allowing the lambda function full access to RDS and s3.
+- aws_iam_policy | task-definition-role-permissions-policy-dashboard: The policy allowing the task definition to access ECR.
 - aws_iam_role | lambda-minute-role: The IAM role holding the relevant policies.
-- aws_iam_policy | lambda-role-permissions-policy: The policy allowing the lambda function full access to RDS.
-- aws_iam_policy_attachment | lambda-role-policy-connection: Attaches the policy to the lambda role.
-- aws_lambda_function | charn-pipeline-lambda: The lambda function itself, which will run the ECR container.
-- aws_iam_role | eventbridge-pipeline-scheduler-role: The IAM role allowing access to the eventbridge scheduler.
-- aws_iam_role_policy | eventbridge-pipeline-role: The policy allowing the scheduler to invoke lambda functions.
-- aws_scheduler_schedule | c21-charn-pipeline-schedule: The  pipeline eventbridge schedule, triggering the lambda every minute on a cron-based schedule.
+- aws_iam_role | lambda-daily-role: The IAM role holding the relevant policies.
+- aws_iam_role | eventbridge-pipeline-scheduler-role: The IAM role allowing access to the eventbridge scheduler for minutely updates.
+- aws_iam_role | eventbridge-pipeline-archive-role: The IAM role allowing access to the eventbridge scheduler for daily updates.
+- aws_iam_role | ecs-execution-dashboard-role: The IAM role allowing the ecs tasks to be executed.
+- aws_iam_role | ecs-task-definition-role-dashboard: The IAM role allowing the task definition to access ECR.
+- aws_iam_policy_attachment | lambda-pipeline-role-policy-connection: Attaches the pipeline policy to the lambda role.
+- aws_iam_policy_attachment | lambda-archive-role-policy-connection: Attaches the archive policy to the lambda role.
+- aws_iam_policy_attachment | ecs-execution-dashboard-role-policy-connection: Attaches the task definition policy to the ECS role.
+- aws_iam_role_policy | eventbridge-pipeline-role: The policy allowing the scheduler to invoke the pipeline lambda function.
+- aws_iam_role_policy | eventbridge-archive-role: The policy allowing the scheduler to invoke the archive lambda function.
+- aws_ecs_task_definition | ecs-dashboard-task-definition: The task definition which will be ran on the ECS Service, hosting the dashboard.
+- aws_ecs_service | ecs-dashboard-service: The ECS service running the dashboard task at all times, on port 8501.
+- aws_lambda_function | charn-pipeline-lambda: The pipeline lambda function itself, which will run the pipeline ECR container.
+- aws_lambda_function | charn-archive-lambda: The lambda function itself, which will run the archive ECR container.
+- aws_scheduler_schedule | c21-charn-pipeline-schedule: The pipeline eventbridge schedule, triggering the lambda every minute on a cron-based schedule.
+- aws_scheduler_schedule | c21-charn-archive-schedule: The archive eventbridge schedule, triggering the lambda every day at 11:59pm on a cron-based schedule.
+- aws_s3_bucket | c21-charn-archive-bucket: The s3 bucket in which the archived data from the RDS database is uploaded to and eventually hosted on the dashboard.
 

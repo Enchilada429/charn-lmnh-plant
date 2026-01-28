@@ -10,3 +10,10 @@ variable "AWS_SECRET_ACCESS_KEY" {
   type = string
 }
 
+variable "VPC_ID" {
+  type = string
+}
+
+variable "CLUSTER_NAME" {
+  type = string
+}
