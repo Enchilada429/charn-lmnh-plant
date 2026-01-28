@@ -36,3 +36,5 @@ def handler(event=None, context=None):
 if __name__ == "__main__":
 
     load_dotenv()
+
+    handler()
