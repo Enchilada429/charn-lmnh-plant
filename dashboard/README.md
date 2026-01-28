@@ -17,7 +17,7 @@ streamlit run dashboard.py --source [data_source]
 ```
 - There are two options for the --source argument: 'csv' or 'db'
     - 'db': Connects to the AWS RDS for real-time streaming.
-    - 'csv': This will plot the data from a csv named 'cleaned_data.csv'.
+    - 'csv': This will plot the data from a CSV. The name of the CSV *must* be added as an argument when the data source is 'csv'.
 
 
 ## Docker & Uploading Image to AWS ECR 🐳🌾
