@@ -23,7 +23,6 @@ def handler(event=None, context=None):
 
     extracted_data = extract()
     cleaned_data = transform_data(extracted_data)
-
     conn = get_db_connection(ENV)
     upload_recording_to_database(conn, cleaned_data)
 
