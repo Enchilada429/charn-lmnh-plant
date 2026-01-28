@@ -56,7 +56,7 @@ def upload_recording_to_database(conn, recording) -> None:
 
     conn.commit()
     logging.info("Successfully inserted %d recording data.",
-                 len(recording_to_insert))
+                len(recording_to_insert))
 
 
 
