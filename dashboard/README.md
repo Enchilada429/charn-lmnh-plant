@@ -2,7 +2,7 @@
 
 ## Environment Variables
 
-There must be a `.env` file in the `pipeline` directory with the following contents:
+There must be a `.env` file in the `dashboard` directory with the following contents:
 
 ```
 DB_HOST=XXXX
