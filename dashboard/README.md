@@ -44,3 +44,11 @@ DB_SCHEMA=XXXX
 ```
 
 These are necessary to connect to the RDS and thus display the data.
+
+There must also be S3 bucket credentials for the `archive` page on the dashboard. This requires the additional credentials in the `.env`:
+
+```
+AWS_SECRET_KEY=XXXX
+AWS_ACCESS_KEY=XXXX
+S3_BUCKET=XXXX
+```
