@@ -13,10 +13,10 @@ if __name__ == '__main__':
     
     plant_recordings = load_data()
 
-    top_5_temp = df.nlargest(5, "temperature")
-    bottom_5_temp = df.nsmallest(5, "temperature")
-    top_5_moist = df.nlargest(5, "soil_moisture")
-    bottom_5_moist = df.nsmallest(5, "soil_moisture")
+    top_5_temp = plant_recordings.nlargest(5, "temperature")
+    bottom_5_temp = plant_recordings.nsmallest(5, "temperature")
+    top_5_moist = plant_recordings.nlargest(5, "soil_moisture")
+    bottom_5_moist = plant_recordings.nsmallest(5, "soil_moisture")
 
 
     st_autorefresh(interval=5000, key='refresh')
@@ -60,6 +60,6 @@ if __name__ == '__main__':
     st.sidebar.header("🌿 Plant Selection")
     plant = st.sidebar.selectbox(
         "Select a plant",
-        sorted(df["plant_name"].dropna().unique())
+        sorted(plant_recordings["plant_name"].dropna().unique())
     )
-    plant_df = df[df["plant_name"] == plant].sort_values("recording_taken")
+    plant_df = plant_recordings[plant_recordings["plant_name"] == plant].sort_values("recording_taken")

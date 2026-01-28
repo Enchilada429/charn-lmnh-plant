@@ -4,6 +4,7 @@ on the dashboard."""
 from os import environ as ENV
 
 import pandas as pd
+import streamlit as st
 from dotenv import load_dotenv
 
 # def get_db_connection():
