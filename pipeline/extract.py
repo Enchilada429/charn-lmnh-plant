@@ -11,10 +11,10 @@ logger = getLogger(__name__)
 PLANT_ENDPOINT = "https://tools.sigmalabs.co.uk/api/plants/"
 
 
-async def get_plant_data(session: aiohttp.ClientSession, id: int) -> dict:
+async def get_plant_data(session: aiohttp.ClientSession, plant_id: int) -> dict:
     """Returns a single plant's data using its id. Requires a session object."""
 
-    async with session.get(PLANT_ENDPOINT + str(id)) as response:
+    async with session.get(PLANT_ENDPOINT + str(plant_id)) as response:
         data = await response.json()
         return data
 
@@ -31,8 +31,8 @@ async def get_all_plants_data(batch_processing_size: int) -> list[dict]:
 
     async with aiohttp.ClientSession() as session:
         while plants_left:
-            tasks = [get_plant_data(session, id)
-                     for id in range(id_counter, id_counter + batch_processing_size)]
+            tasks = [get_plant_data(session, plant_id)
+                     for plant_id in range(id_counter, id_counter + batch_processing_size)]
 
             results = await asyncio.gather(*tasks)
 
