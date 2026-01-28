@@ -10,6 +10,20 @@ To run the the archive script, run the following command:
 ```
 python3 archive.py
 ```
+## Environment Variables
+
+# Database connection
+DB_DRIVER=ODBC Driver 18 for SQL Server
+DB_HOST=your-db-hostname
+DB_PORT=1433
+DB_NAME=your-database-name
+DB_USERNAME=your-username
+DB_PASSWORD=your-password
+
+# S3 configuration
+S3_BUCKET=c21-charn-archive-bucket
+S3_PREFIX=archive/
+
 ## How it works
 
 The script connects to the SQL Server database using environment variables for the connection details.
@@ -24,12 +38,3 @@ Once the upload is successful, the archived rows are deleted from the database.
 
 The database connection is then closed and the script exits.
 
-## Docker & Uploading Image to AWS ECR
-
-If you want to upload a Docker image of this archive to your AWS ECR, run the following:
-
-```
-sh dockerise.sh
-```
-
-You will be given prompts to enter your `AWS_ACCOUNT_ID`, `AWS_REGION`, and `AWS_ECR_REPO` name. These can all be found on AWS.
