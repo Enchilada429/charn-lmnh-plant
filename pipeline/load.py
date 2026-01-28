@@ -6,7 +6,7 @@ from os import environ as ENV, _Environ
 import pyodbc
 from dotenv import load_dotenv
 
-from extract import extract_data
+from extract import extract
 from transform import transform_data
 
 
@@ -62,7 +62,7 @@ def upload_recording_to_database(conn, recording) -> None:
 if __name__ == "__main__":
     load_dotenv()
 
-    data = extract_data()
+    data = extract()
     df_transformed = transform_data(data)
 
     conn = get_db_connection(ENV)
