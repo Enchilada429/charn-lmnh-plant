@@ -1,26 +1,26 @@
 """Script for uploading the cleaned data to the RDS (SQL Server)."""
 
 import logging
-from os import environ as ENV
+from os import environ as ENV, _Environ
 
 import pyodbc
 from dotenv import load_dotenv
 
-from extract import extract_data
+from extract import extract
 from transform import transform_data
 
 
 logging.basicConfig(level=logging.INFO)
 
 
-def handler(event=None, context=None):
+def get_db_connection(config: _Environ):
     """Create and return a SQL Server connection."""
     conn_str = (
-        f"DRIVER={{{ENV['DB_DRIVER']}}};"
-        f"SERVER={ENV['DB_HOST']},{ENV['DB_PORT']};"
-        f"DATABASE={ENV['DB_NAME']};"
-        f"UID={ENV['DB_USERNAME']};"
-        f"PWD={ENV['DB_PASSWORD']};"
+        f"DRIVER={{{config['DB_DRIVER']}}};"
+        f"SERVER={config['DB_HOST']},{config['DB_PORT']};"
+        f"DATABASE={config['DB_NAME']};"
+        f"UID={config['DB_USERNAME']};"
+        f"PWD={config['DB_PASSWORD']};"
         f"Encrypt=no;"
     )
 
@@ -56,17 +56,16 @@ def upload_recording_to_database(conn, recording) -> None:
 
     conn.commit()
     logging.info("Successfully inserted %d recording data.",
-                 len(recording_to_insert))
-
+                len(recording_to_insert))
 
 
 if __name__ == "__main__":
     load_dotenv()
 
-    data = extract_data()
-    df_transformed = transform_data(data)
+    extracted_data = extract()
+    df_transformed = transform_data(extracted_data)
 
-    conn = handler()
+    conn = get_db_connection(ENV)
     try:
         upload_recording_to_database(conn, df_transformed)
     finally:
