@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 from load_data import load_data
 from charts import bar_chart
 
-if __name__ == '__main__':
-    load_dotenv()
+def parse_args():
+    """Handles argument functionality for running the dashboard."""
     parser = ArgumentParser()
     parser.add_argument(
     "--source",
@@ -24,7 +24,13 @@ if __name__ == '__main__':
     dest="csv_path",
     help="Path to CSV file (required when --source csv)",)
     args = parser.parse_args()
+    
+    return args
 
+if __name__ == '__main__':
+    load_dotenv()
+    args = parse_args()
+    
     plant_recordings = load_data(
         source=args.source,
         csv_path=args.csv_path,
