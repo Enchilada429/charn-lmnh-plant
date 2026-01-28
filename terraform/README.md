@@ -10,14 +10,22 @@ Inside this file, create 5 variables:
     - VPC_ID                = \[YOUR VPC OF CHOICE HERE\]
     - CLUSTER_NAME          = \[YOUR CLUSTER NAME HERE\]
 
+In this form:
+```
+AWS_DEFAULT_REGION    = "<THE REGION OF CHOICE>"
+AWS_ACCESS_KEY_ID     = "<YOUR AWS ACCESS KEY ID HERE>"
+AWS_SECRET_ACCESS_KEY = "<YOUR SECRET AWS KEY HERE>"
+VPC_ID                = "<YOUR VPC OF CHOICE HERE>"
+CLUSTER_NAME          = "<YOUR CLUSTER NAME HERE>"
+```
+
 Next, run the following commands in the following order:
 
 1. `terraform init` - This initialises the directory for terraform usage.
-2. `terraform plan` - This is a check to see that the terraform will not run into any issues, and give an overview of the resources it will create/change. If this is the first time terraform has been run, you should see an error which states that it could not find a specific resource on a specific repository. This is because the docker images that exist in the local repository needed an ECR repository to exist to be pushed to. Running the next command should create these repositories and then fail.
-3. `terraform apply` -> `yes` - This applies the changes and begins to create the resources described.
-4. *Important info:* The previous command should fail. This is because if terraform has not yet been ran, and no resources exist on the cloud yet, the terraform code which references the ECR repository will as of now reference nothing. To fix this, you will need to push the relevant images to the respective ECR repositories so they can be referenced.
-5. *Push relevant images* - As described before, run each of the 3 dockerfile bash scripts to push the images to the correct repositories.
-6. `terraform apply` -> `yes` - If all goes well, this should run fine, creating the desired resources.
+2. `terraform apply` -> `yes` - This applies the changes and begins to create the resources described.
+3. *Important info:* The previous command should fail. This is because if terraform has not yet been ran, and no resources exist on the cloud yet, the terraform code which references the ECR repository will as of now reference nothing. To fix this, you will need to push the relevant images to the respective ECR repositories so they can be referenced.
+4. *Push relevant images* - As described before, run each of the 3 dockerfile bash scripts to push the images to the correct repositories.
+5. `terraform apply` -> `yes` - If all goes well, this should run fine, creating the desired resources.
 
 ## List of terraform resources main.tf will create:
 - aws_ecr_repository | charn-pipeline-repo: The ECR repository for the pipeline container.
