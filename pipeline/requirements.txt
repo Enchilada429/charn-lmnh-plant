@@ -8,3 +8,5 @@ pyodbc
 aiohttp
 asyncio
 requests
+pytest-asyncio
+pytest-cov
