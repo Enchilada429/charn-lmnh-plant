@@ -108,3 +108,5 @@ terraform.*
 *.pemkey
 
 *.parquet
+
+*.csv
