@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 
 logging.basicConfig(level=logging.INFO)
 
+@st.cache_resource
 def get_db_connection() -> Connection:
     """Connects to the DB."""
     conn_str = (f"DRIVER={{{ENV['DB_DRIVER']}}};SERVER={ENV['DB_HOST']};"
