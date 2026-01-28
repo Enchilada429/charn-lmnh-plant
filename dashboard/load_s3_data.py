@@ -1,4 +1,4 @@
-"""Script which provides downloadable links to objects in the S3 buckets."""
+"""This script provides downloadable links to objects in the S3 buckets."""
 
 from os import environ as ENV, _Environ
 
@@ -6,9 +6,6 @@ from dotenv import load_dotenv
 from re import match
 from boto3 import client
 from mypy_boto3_s3.client import S3Client
-
-
-S3_BUCKET_NAME = "c21-charn-archive-bucket"
 
 
 def get_s3_client(config: _Environ) -> client:
@@ -55,4 +52,4 @@ if __name__ == "__main__":
 
     s3 = get_s3_client(ENV)
 
-    print(get_all_object_urls(s3, S3_BUCKET_NAME))
+    print(get_all_object_urls(s3, ENV["S3_BUCKET"]))
