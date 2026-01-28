@@ -1,4 +1,4 @@
-export $(grep -v '^#' .env | xargs)
+source .env
 
 read -p 'AWS Account ID: ' AWS_ACCOUNT_ID
 read -p 'AWS Region: ' AWS_REGION
