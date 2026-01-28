@@ -32,7 +32,7 @@ async def get_all_plants_data(batch_processing_size: int) -> list[dict]:
     async with aiohttp.ClientSession() as session:
         while plants_left:
             tasks = [get_plant_data(session, id)
-                     for id in range(id_counter, id_counter + batch_processing_size)]
+                    for id in range(id_counter, id_counter + batch_processing_size)]
 
             results = await asyncio.gather(*tasks)
 
