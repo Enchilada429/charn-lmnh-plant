@@ -23,4 +23,14 @@ The gardeners at the LMNH want to be able to monitor the health of their plants 
 │   ├── 
 ```
 
+## Architecture Diagram & ERD 🧩🪷
+
+![Architecture Diagram](Charn_LMNH_Plant_Architecture_Diagram.png)
+
+![ERD Diagram](erd_ver6.png)
+
+
+## Data Source 📊🌱
+[text](https://tools.sigmalabs.co.uk/api/plants/8)
+
 Ⓒ Charn Group (Basil, Fariha, Omar Y, Sam)
