@@ -4,7 +4,7 @@ import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 import pandas as pd
 
-from charts import plot_temp_over_time, plot_moisture_over_time
+# from charts import plot_temp_over_time, plot_moisture_over_time
 
 st_autorefresh(interval=5000, key='refresh')
 
@@ -16,7 +16,6 @@ st.set_page_config(
 st.title(" 🌱 LMNH Plant Monitoring Dashboard ")
 
 st.subheader(" Alerts 🥀")
-
 
 
 st.sidebar.header("Controls")
