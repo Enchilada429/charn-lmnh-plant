@@ -8,6 +8,8 @@ COPY load_data.py .
 
 COPY charts.py .
 
+COPY pages/archive_pages.py .
+
 COPY dashboard.py .
 
 CMD ["python", "dashboard.py"]

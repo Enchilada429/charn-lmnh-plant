@@ -108,3 +108,8 @@ terraform.*
 *.pemkey
 
 *.parquet
+
+*.csv
+*.pipeline/cleaned_data.csv
+*.cleaned_data.csv
+*.dashboard/cleaned_data.csv
