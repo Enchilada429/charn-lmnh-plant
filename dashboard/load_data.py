@@ -4,7 +4,6 @@ on the dashboard."""
 from os import environ as ENV
 
 import pandas as pd
-import streamlit as st
 from dotenv import load_dotenv
 
 # def get_db_connection():
@@ -33,11 +32,8 @@ from dotenv import load_dotenv
 #     return [list(row) for row in data]
 
 @st.cache_data
-def load_data():
+def load_data() -> pd.DataFrame:
+    """This loads the cleaned plant recording data. This is a static version of the RDS data that will be used."""
     df = pd.read_csv("cleaned_data.csv")
     df["recording_taken"] = pd.to_datetime(df["recording_taken"])
     return df
-
-
-if __name__ == '__main__':
-    load_dotenv()

@@ -4,15 +4,16 @@ import pandas as pd
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 
+from dotenv import load_dotenv
 from load_data import load_data
 from charts import bar_chart
 
 df = load_data()
 
-top5_temp = df.nlargest(5, "temperature")
-low5_temp = df.nsmallest(5, "temperature")
-top5_moist = df.nlargest(5, "soil_moisture")
-low5_moist = df.nsmallest(5, "soil_moisture")
+top_5_temp = df.nlargest(5, "temperature")
+bottom_5_temp = df.nsmallest(5, "temperature")
+top_5_moist = df.nlargest(5, "soil_moisture")
+bottom_5_moist = df.nsmallest(5, "soil_moisture")
 
 
 st_autorefresh(interval=5000, key='refresh')
@@ -59,3 +60,6 @@ plant = st.sidebar.selectbox(
     sorted(df["plant_name"].dropna().unique())
 )
 plant_df = df[df["plant_name"] == plant].sort_values("recording_taken")
+
+if __name__ == '__main__':
+    load_dotenv()

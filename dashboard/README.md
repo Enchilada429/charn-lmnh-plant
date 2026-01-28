@@ -13,6 +13,8 @@ DB_NAME=XXXX
 DB_SCHEMA=XXXX
 ```
 
+These are necessary to connect to the RDS and thus display the data.
+
 ## Files
 - `load_data.py`: Loads the relevant data from the database.
 - `charts.py`: Creates plots to be displayed on dashboard.
