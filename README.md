@@ -31,6 +31,6 @@ The gardeners at the LMNH want to be able to monitor the health of their plants 
 
 
 ## Data Source 📊🌱
-[text](https://tools.sigmalabs.co.uk/api/plants/8)
+The data source from which this pipeline extracts recordings is this [API](https://tools.sigmalabs.co.uk/api/plants/8)
 
 Ⓒ Charn Group (Basil, Fariha, Omar Y, Sam)
