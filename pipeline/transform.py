@@ -1,5 +1,5 @@
 """Script for cleaning and modifying the extracted data."""
-from extract import get_all_plants_data
+from extract import extract
 import pandas as pd
 
 
@@ -78,7 +78,7 @@ def transform_data(records: list[dict]) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    data = get_all_plants_data()
-    df_transformed = transform_data(data)
+    extracted_data = extract()
+    df_transformed = transform_data(extracted_data)
 
     print(df_transformed.head(50))
