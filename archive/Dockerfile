@@ -5,7 +5,7 @@ COPY requirements.txt ${LAMBDA_TASK_ROOT}
 
 RUN pip3 install -r requirements.txt
 
-COPY archive.py . ${LAMBDA_TASK_ROOT}
+COPY archive.py ${LAMBDA_TASK_ROOT}
 
 CMD ["archive.handler"]
 
