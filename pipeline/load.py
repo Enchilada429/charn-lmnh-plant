@@ -32,6 +32,7 @@ def get_db_connection(config: _Environ):
 
 
 def get_or_create_country_id(cur, country_name: str) -> int:
+    """Gets or creates country_id"""
     cur.execute(
         "SELECT country_id FROM beta.country WHERE country_name = ?;",
         (country_name,),
@@ -53,6 +54,7 @@ def get_or_create_country_id(cur, country_name: str) -> int:
 
 
 def get_or_create_botanist_id(cur, name, email, phone):
+    """Gets or creates botanist_id"""
     cur.execute(
         "SELECT botanist_id FROM beta.botanist WHERE email = ?;",
         (email,),
@@ -74,6 +76,7 @@ def get_or_create_botanist_id(cur, name, email, phone):
 
 
 def get_or_create_plant_id(cur, common_name: str, scientific_name: str | None) -> int:
+    """Gets or creates plant_id"""
     cur.execute(
         "SELECT plant_id FROM beta.plant WHERE common_name = ?;",
         (common_name,),
@@ -95,6 +98,7 @@ def get_or_create_plant_id(cur, common_name: str, scientific_name: str | None) -
 
 
 def get_or_create_image_id(cur, license: int, license_name: str, license_url: str, thumbnail: str | None) -> int:
+    """Gets or creates image_id"""
     cur.execute(
         "SELECT image_id FROM beta.plant_image WHERE licence = ?;",
         (license,),
@@ -116,6 +120,7 @@ def get_or_create_image_id(cur, license: int, license_name: str, license_url: st
 
 
 def get_or_create_origin_location_id(cur, city: str, country_id: int, longitude, latitude) -> int:
+    """Gets or creates location_id"""
     cur.execute(
         """
         SELECT origin_location_id
@@ -148,7 +153,7 @@ def get_or_create_origin_location_id(cur, city: str, country_id: int, longitude,
 
 
 def upload_recording_to_database(conn, recording) -> None:
-    """Uploads formatted recording data to the DB."""
+    """Inserts cleaned data into the database, creating any missing related records before inserting the final rows."""
     logger.info(f"Starting upload of {len(recording)} recording.")
 
     recording_to_insert = []
