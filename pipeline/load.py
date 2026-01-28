@@ -62,8 +62,8 @@ def upload_recording_to_database(conn, recording) -> None:
 if __name__ == "__main__":
     load_dotenv()
 
-    data = extract()
-    df_transformed = transform_data(data)
+    extracted_data = extract()
+    df_transformed = transform_data(extracted_data)
 
     conn = get_db_connection(ENV)
     try:
