@@ -17,9 +17,9 @@ logger.setLevel(INFO)
 def handler(event=None, context=None):
     """Executes the entire ETL pipeline. Is formatted as a Lambda function."""
 
-    start_time = perf_counter()
-
     logger.info("ETL Pipeline started.")
+
+    start_time = perf_counter()
 
     extracted_data = extract()
     cleaned_data = transform_data(extracted_data)

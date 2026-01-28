@@ -1,6 +1,12 @@
 """Script for cleaning and modifying the extracted data."""
+
+from time import perf_counter
+from logging import getLogger, basicConfig, INFO
+
 from extract import extract
 import pandas as pd
+
+logger = getLogger(__name__)
 
 
 def build_dataframe(records: list[dict]) -> pd.DataFrame:
@@ -71,13 +77,25 @@ def drop_outliers(df: pd.DataFrame) -> pd.DataFrame:
 
 def transform_data(records: list[dict]) -> pd.DataFrame:
     """Calls all transform functions"""
+
+    logger.info("Data cleaning started.")
+
+    start_time = perf_counter()
+
     df = build_dataframe(records)
     df = convert_datatypes(df)
     df = drop_outliers(df)
+
+    logger.info(
+        f"Data cleaning finished with time taken: {perf_counter() - start_time} seconds.")
+
     return df
 
 
 if __name__ == "__main__":
+
+    basicConfig(level=INFO)
+
     extracted_data = extract()
     df_transformed = transform_data(extracted_data)
 
