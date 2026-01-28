@@ -1,6 +1,6 @@
 """Script for uploading the cleaned data to the RDS (SQL Server)."""
 
-import logging
+from logging import getLogger, basicConfig, INFO
 from os import environ as ENV, _Environ
 
 import pyodbc
@@ -10,7 +10,7 @@ from extract import extract
 from transform import transform_data
 
 
-logging.basicConfig(level=logging.INFO)
+logger = getLogger(__name__)
 
 
 def get_db_connection(config: _Environ):
@@ -24,16 +24,16 @@ def get_db_connection(config: _Environ):
         f"Encrypt=no;"
     )
 
-    logging.info("Connecting to SQL Server")
+    logger.info("Connecting to SQL Server.")
     conn = pyodbc.connect(conn_str)
-    logging.info("Connection established")
+    logger.info("Connection established.")
 
     return conn
 
 
 def upload_recording_to_database(conn, recording) -> None:
     """Uploads formatted recording data to the DB."""
-    logging.info("Starting upload of %d recording", len(recording))
+    logger.info(f"Starting upload of {len(recording)} recording.")
 
     recording_to_insert = []
     for _, row in recording.iterrows():
@@ -55,11 +55,14 @@ def upload_recording_to_database(conn, recording) -> None:
         curs.executemany(insert_query, recording_to_insert)
 
     conn.commit()
-    logging.info("Successfully inserted %d recording data.",
-                 len(recording_to_insert))
+    logger.info(
+        f"Successfully inserted {len(recording_to_insert)} recording data.")
 
 
 if __name__ == "__main__":
+
+    basicConfig(level=INFO)
+
     load_dotenv()
 
     extracted_data = extract()
