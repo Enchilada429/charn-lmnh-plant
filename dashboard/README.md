@@ -1,5 +1,18 @@
 # 🌱 LMNH Plant Monitoring Dashboard
 
+## Environment Variables
+
+There must be a `.env` file in the `pipeline` directory with the following contents:
+
+```
+DB_HOST=XXXX
+DB_PORT=1433
+DB_USER=XXXX
+DB_PASSWORD=XXXX
+DB_NAME=XXXX
+DB_SCHEMA=XXXX
+```
+
 ## Files
 - `load_data.py`: Loads the relevant data from the database.
 - `charts.py`: Creates plots to be displayed on dashboard.
