@@ -22,12 +22,31 @@ def get_s3_client(config: _Environ) -> client:
 
 
 def get_object_list(s3_client: S3Client, bucket_name: str, regex: str = r".") -> list[str]:
-    """Gets a list of objects inside the S3 bucket.
+    """Returns a list of objects inside the S3 bucket.
     Optional regex parameter to specify object names wanted."""
 
     objects = s3_client.list_objects(Bucket=bucket_name)["Contents"]
 
     return [object["Key"] for object in objects if match(regex, object["Key"])]
+
+
+def generate_object_url(s3_client: S3Client, bucket_name: str, object_name: str) -> str:
+    """Returns a download link to object in S3 bucket."""
+
+    return s3_client.generate_presigned_url("get_object",
+                                            Params={
+                                                "Bucket": bucket_name,
+                                                "Key": object_name
+                                            },
+                                            ExpiresIn=60)
+
+
+def get_all_object_urls(s3_client: S3Client, bucket_name: str) -> dict:
+    """Returns a dict of all object names and download links in the bucket."""
+
+    object_list = get_object_list(s3_client, bucket_name)
+
+    return {object_name: generate_object_url(s3_client, bucket_name, object_name) for object_name in object_list}
 
 
 if __name__ == "__main__":
@@ -36,4 +55,4 @@ if __name__ == "__main__":
 
     s3 = get_s3_client(ENV)
 
-    print(s3)
+    print(get_all_object_urls(s3, S3_BUCKET_NAME))
