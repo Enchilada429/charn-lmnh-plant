@@ -16,8 +16,8 @@ def test_build_dataframe_valid_columns(test_plant_data):
         "plant_name",
         "scientific_name",
         "botanist_name",
-        "botanist_email",
-        "botanist_phone",
+        "email",
+        "phone",
         "origin_city",
         "origin_country",
         "latitude",
@@ -43,8 +43,8 @@ def test_build_dataframe_valid_df(test_plant_data):
         "plant_name": ["Bird of paradise"],
         "scientific_name": ["Heliconia schiedeana 'Fire and Ice'"],
         "botanist_name": ["Anna Davis"],
-        "botanist_email": ["anna.davis@lnhm.co.uk"],
-        "botanist_phone": ["(601)561-8163x5240"],
+        "email": ["anna.davis@lnhm.co.uk"],
+        "phone": ["(601)561-8163x5240"],
         "origin_city": ["South Tina"],
         "origin_country": ["United Arab Emirates"],
         "latitude": ["-60.9363685"],
@@ -71,9 +71,16 @@ def test_convert_datatypes_valid():
         "last_watered": ["2026-01-27T14:47:07"],
         "recording_taken": ["2026-01-27T16:04:39.600475"],
         "soil_moisture": [95.0],
-        "temperature": [16.0]
+        "temperature": [16.0],
+        "scientific_name": [None],
+        "license": [None],
+        "license_url": [None],
+        "license_name": [None],
+        "thumbnail": [None],
+        "email": [None],
+        "phone": [None],
     })
-    print(test_df.dtypes)
+
     converted_df = convert_datatypes(test_df)
 
     assert all(converted_df["latitude"].map(
@@ -81,13 +88,21 @@ def test_convert_datatypes_valid():
     assert all(converted_df["longitude"].map(
         lambda val: isinstance(val, float)))
     assert all(converted_df["last_watered"].map(
-        lambda val: isinstance(val, datetime)))
+        lambda val: isinstance(val, pd.Timestamp)))
     assert all(converted_df["recording_taken"].map(
-        lambda val: isinstance(val, datetime)))
+        lambda val: isinstance(val, pd.Timestamp)))
     assert all(converted_df["soil_moisture"].map(
         lambda val: isinstance(val, float)))
     assert all(converted_df["temperature"].map(
         lambda val: isinstance(val, float)))
+
+    assert converted_df.loc[0, "scientific_name"] == "None"
+    assert converted_df.loc[0, "license"] == 0
+    assert converted_df.loc[0, "license_url"] == "None"
+    assert converted_df.loc[0, "license_name"] == "None"
+    assert converted_df.loc[0, "thumbnail"] == "None"
+    assert converted_df.loc[0, "email"] == "None"
+    assert converted_df.loc[0, "phone"] == "None"
 
 
 def test_drop_outliers_valid():
