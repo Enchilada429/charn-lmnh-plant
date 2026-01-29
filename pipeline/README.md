@@ -7,7 +7,7 @@ There must be a `.env` file in the `pipeline` directory with the following conte
 ```
 DB_HOST=XXXX
 DB_PORT=1433
-DB_USER=XXXX
+DB_USERNAME=XXXX
 DB_PASSWORD=XXXX
 DB_NAME=XXXX
 DB_SCHEMA=XXXX
@@ -31,5 +31,3 @@ If you want to upload a Docker image of this pipeline to your AWS ECR, run the f
 ```
 sh dockerise.sh
 ```
-
-You will be given prompts to enter your `AWS_ACCOUNT_ID`, `AWS_REGION`, and `AWS_ECR_REPO` name. These can all be found on AWS.
