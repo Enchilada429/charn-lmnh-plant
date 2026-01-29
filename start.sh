@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 source .env
 
 TERRAFORM_DIR="./terraform"
@@ -11,6 +10,7 @@ log() {
     echo -e "\n🪷 $1\n"
 }
 
+
 log "🌱 Starting full infrastructure and deployment run..."
 
 
@@ -19,11 +19,11 @@ cd "$TERRAFORM_DIR"
 terraform init
 
 
-log "🌱 Running first terraform apply (this may fail on fresh setup)..."
-set +e
-terraform apply -auto-approve
-TF_EXIT_CODE=$?
-set -e
+log "🌱 Applying ECR repositories only..."
+terraform apply -auto-approve \
+    -target=aws_ecr_repository.c21-charn-pipeline-ecr \
+    -target=aws_ecr_repository.c21-charn-dashboard-ecr \
+    -target=aws_ecr_repository.c21-charn-archive-ecr
 
 
 log "🌱 Building & pushing pipeline image..."
@@ -38,13 +38,13 @@ cd "$DASHBOARD_DIR"
 cd ..
 
 
-log "🌱 Building & pushing archived data image..."
+log "🌱 Building & pushing archive image..."
 cd "$ARCHIVE_DIR"
 ./dockerise.sh
 cd ..
 
 
-log "🌱 Running second terraform apply..."
+log "🌱 Applying remaining resources..."
 cd "$TERRAFORM_DIR"
 terraform apply -auto-approve
 
