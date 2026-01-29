@@ -54,6 +54,7 @@ def convert_datatypes(df: pd.DataFrame) -> pd.DataFrame:
     df["latitude"] = pd.to_numeric(df["latitude"], errors="coerce")
     df["longitude"] = pd.to_numeric(df["longitude"], errors="coerce")
     df["soil_moisture"] = pd.to_numeric(df["soil_moisture"], errors="coerce")
+    df.loc[df["soil_moisture"] < 0, "soil_moisture"] = pd.NA
     df["temperature"] = pd.to_numeric(df["temperature"], errors="coerce")
     df["scientific_name"] = df["scientific_name"].where(
         df["scientific_name"].notna(), "None")
