@@ -139,9 +139,6 @@ resource "aws_lb_target_group" "c21-charn-target-group" {
   vpc_id = data.aws_vpc.cohort-vpc.id
 }
 
-# data "aws_lb_target_group" "c21-charn-lb-target-group" {
-#   name = "c21-charn-target-group"
-# }
 ######################################################## 
 
 
