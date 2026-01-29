@@ -4,6 +4,15 @@ A fully-functioning, end-to-end ETL pipeline and dashboard which cleans, transfo
 ## Introduction 🌷
 The gardeners at the LMNH want to be able to monitor the health of their plants over time. This project provides a solution to this by building an ETL pipeline that takes in the readings from the temperature and moisture sensors within the garden and analyses these recordings for all the plants. 
 
+## Getting Started 🏁🌴
+The entire project, beginning with running the terraform, building the docker images and pushing them to AWS, to allow for the pipeline and dashboard to be run on the cloud, can simply be started by running the `start.sh` script. Simply run the following command:
+
+```
+sh start.sh
+```
+
+and watch your pipeline and dashboard blossom!
+
 ## Project Structure 📂🪷
 
 ```text
