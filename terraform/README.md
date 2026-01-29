@@ -3,7 +3,7 @@
 ## setup
 To begin, move into the *terraform* directory with `cd terraform` \
 Then, create a file to hold the secret variables in, called `terraform.tfvars`, using the command: `touch terraform.tfvars`
-Inside this file, create 5 variables in this form:
+Inside this file, create the following variables in the form:
 
 ```
 AWS_DEFAULT_REGION    = "<THE REGION OF CHOICE>"
@@ -11,6 +11,14 @@ AWS_ACCESS_KEY_ID     = "<YOUR AWS ACCESS KEY ID HERE>"
 AWS_SECRET_ACCESS_KEY = "<YOUR SECRET AWS KEY HERE>"
 VPC_ID                = "<YOUR VPC OF CHOICE HERE>"
 CLUSTER_NAME          = "<YOUR CLUSTER NAME HERE>"
+
+DB_DRIVER   = "<THE DB DRIVER NAME>"
+DB_HOST     = "<THE HOST LINK TO THE RDS>"
+DB_USERNAME = "<THE USERNAME OF THE USER>"
+DB_PASSWORD = "<THE PASSWORD OF THE USER>"
+DB_NAME     = "<THE NAME OF THE DATABASE>"
+
+S3_BUCKET = "<THE NAME OF THE S3 BUCKET TO ARCHIVE TO>"
 ```
 
 Next, run the following commands in the following order:
