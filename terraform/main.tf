@@ -554,7 +554,42 @@ resource "aws_s3_bucket" "c21-charn-archive-bucket" {
   tags = {
     Name = "c21-charn-archive-bucket"
   }
-
+  
   force_destroy = true
 }
 #################################################
+
+
+################### s3 Bucket Policy ###################
+
+resource "aws_s3_bucket_policy" "c21-charn-public-bucket-policy" {
+  bucket = aws_s3_bucket.c21-charn-archive-bucket.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+        Sid = "PublicReadGetObject"
+        Effect = "Allow"
+        Principal = "*"
+        Action = "s3:GetObject"
+        Resource = [
+            "arn:aws:s3:::c21-charn-archive-bucket/*"
+        ]
+    }
+    ]
+  })
+}
+########################################################
+
+
+################### s3 Bucket Public Access Block ###################
+
+resource "aws_s3_bucket_public_access_block" "c21-charn-archive-bucket-block" {
+    bucket = aws_s3_bucket.c21-charn-archive-bucket.id
+
+    block_public_acls = false
+    block_public_policy = false
+    ignore_public_acls = false
+    restrict_public_buckets = false
+}
+#####################################################################
