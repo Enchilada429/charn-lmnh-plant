@@ -1,8 +1,5 @@
 """Script for hosting the dashboard for the past 24 hours of data."""
 
-import logging
-from argparse import ArgumentParser
-
 import pandas as pd
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
@@ -13,6 +10,7 @@ from charts import bar_chart
 
 def display_dashboard():
     """Outputs the main visualisations of the dashboard."""
+    load_dotenv()
     plant_recordings = load_data()
 
     top_5_temp = plant_recordings.nlargest(5, "temperature")
@@ -36,24 +34,24 @@ def display_dashboard():
     with col1:
         st.subheader("Temperature Extremes")
         st.altair_chart(
-            bar_chart(top_5_temp, "temperature", "plant_name", "Top 5 Highest Temperatures"),
+            bar_chart(top_5_temp, "temperature", "common_name", "Top 5 Highest Temperatures"),
             use_container_width=True,
         )
 
         st.altair_chart(
-            bar_chart(bottom_5_temp, "temperature", "plant_name", "Top 5 Lowest Temperatures"),
+            bar_chart(bottom_5_temp, "temperature", "common_name", "Top 5 Lowest Temperatures"),
             use_container_width=True,
         )
 
     with col2:
         st.subheader("Soil Moisture Extremes")
         st.altair_chart(
-            bar_chart(top_5_moist, "soil_moisture", "plant_name", "Top 5 Highest Soil Moisture"),
+            bar_chart(top_5_moist, "soil_moisture", "common_name", "Top 5 Highest Soil Moisture"),
             use_container_width=True,
         )
 
         st.altair_chart(
-            bar_chart(bottom_5_moist, "soil_moisture", "plant_name", "Top 5 Lowest Soil Moisture"),
+            bar_chart(bottom_5_moist, "soil_moisture", "common_name", "Top 5 Lowest Soil Moisture"),
             use_container_width=True,
         )
 
@@ -61,11 +59,10 @@ def display_dashboard():
     st.sidebar.header("🌿 Plant Selection")
     plant = st.sidebar.selectbox(
         "Select a plant",
-        sorted(plant_recordings["plant_name"].dropna().unique())
+        sorted(plant_recordings["common_name"].dropna().unique())
     )
-    plant_df = plant_recordings[plant_recordings["plant_name"] == plant].sort_values("recording_taken")
+    plant_df = plant_recordings[plant_recordings["common_name"] == plant].sort_values("recording_taken")
 
 if __name__ == '__main__':
     load_dotenv()
-    args = parse_args()
-    
+    display_dashboard()
