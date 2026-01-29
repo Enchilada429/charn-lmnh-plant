@@ -8,11 +8,14 @@ from dotenv import load_dotenv
 from load_data import load_data
 from charts import bar_chart, plot_temp_over_time, plot_moisture_over_time
 
+
 def display_dashboard():
     """Outputs the main visualisations of the dashboard."""
     load_dotenv()
     plant_recordings = load_data()
 
+    st.error("Error!")
+    
     top_5_temp = plant_recordings.nlargest(5, "temperature")
     bottom_5_temp = plant_recordings.nsmallest(5, "temperature")
     top_5_moist = plant_recordings.nlargest(5, "soil_moisture")

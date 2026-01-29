@@ -12,7 +12,8 @@ def bar_chart(data, x_col, y_col, title):
         alt.Chart(data)
         .mark_bar()
         .encode(
-            x=alt.X(f"{x_col}:Q", title=x_col),
+            x=alt.X(f"{x_col}:Q", title=x_col.title() + " (ºC)" if x_col == 'temperature' else
+                    x_col.replace("_", " ").title() + " (ml)"),
             y=alt.Y(f"{y_col}:N", sort="-x", title="Plant"),
             color=alt.value('palevioletred'),
             tooltip=[y_col, x_col]
@@ -24,9 +25,9 @@ def bar_chart(data, x_col, y_col, title):
 def plot_temp_over_time(df):
     """Plots temperature over time for each plant."""
     chart = alt.Chart(df).mark_line(point=True).encode(
-        x=alt.X("recording_taken:T", title="Time"),
-        y=alt.Y("temperature:Q", title="Temperature"),
-        color=alt.value('purple')
+        x=alt.X("recording_taken:T", title="Time (hours)"),
+        y=alt.Y("temperature:Q", title="Temperature (ºC)"),
+        color=alt.value('orchid')
     ).properties(
         title="Temperature over Time"
     )
@@ -36,9 +37,9 @@ def plot_temp_over_time(df):
 def plot_moisture_over_time(df):
     """Plots soil moisture over time for each plant."""
     chart = alt.Chart(df).mark_line(point=True).encode(
-        x=alt.X("recording_taken:T", title="Time"),
-        y=alt.Y("soil_moisture:Q", title="Soil Moisture"),
-        color=alt.value('purple')
+        x=alt.X("recording_taken:T", title="Time (hours)"),
+        y=alt.Y("soil_moisture:Q", title="Soil Moisture (ml)"),
+        color=alt.value('orchid')
     ).properties(
         title="Soil Moisture over Time"
     )
