@@ -18,20 +18,24 @@ and watch your pipeline and dashboard blossom!
 ## Project Structure 📂🪷
 
 ```text
+├── archive/
+│   └── archive.py
+│
+├── dashboard/
+│   ├── load_data.py
+│   ├── charts.py
+│   ├── dashboard.py
+│   └── pages/
+│       └── archive_page.py
+│
 ├── pipeline/
 │   ├── extract.py
 │   ├── transform.py
 │   ├── load.py
 │   └── pipeline.py
 │
-└── dashboard/
-    ├── load_data.py
-    ├── charts.py
-    ├── dashboard.py
-    └── pages/
-        └── archive_page.py
-├── archive/
-│   ├── 
+└── terraform/
+    └── main.tf
 ```
 
 ## Architecture Diagram & ERD 🧩🪷
