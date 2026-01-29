@@ -1,11 +1,35 @@
 # dockerfile to create the archive image
-FROM public.ecr.aws/lambda/python:3.12
+FROM public.ecr.aws/lambda/python:3.13
 
-COPY requirements.txt ${LAMBDA_TASK_ROOT}
+ARG UNIXODBC_VERSION=2.3.12
 
-RUN pip3 install -r requirements.txt
+RUN dnf install -y gzip tar openssl-devel gcc gcc-c++ make automake kernel-devel
 
-COPY archive.py ${LAMBDA_TASK_ROOT}
+RUN curl ftp://ftp.unixodbc.org/pub/unixODBC/unixODBC-${UNIXODBC_VERSION}.tar.gz -O \
+    && tar xzvf unixODBC-${UNIXODBC_VERSION}.tar.gz \
+    && cd unixODBC-${UNIXODBC_VERSION} \
+    && ./configure --sysconfdir=/opt --disable-gui --disable-drivers --enable-iconv --with-iconv-char-enc=UTF8 --with-iconv-ucode-enc=UTF16LE --prefix=/opt \
+    && make \
+    && make install
+
+RUN curl https://packages.microsoft.com/config/rhel/9/prod.repo > /etc/yum.repos.d/mssql-release.repo
+RUN dnf install -y e2fsprogs fuse-libs libss
+RUN ACCEPT_EULA=Y dnf install -y msodbcsql18
+
+ENV CFLAGS="-I/opt/include"
+ENV LDFLAGS="-L/opt/lib"
+
+RUN mkdir /opt/python/ && cd /opt/python/ && pip install pyodbc -t .
+
+RUN dnf install -y openssl
+
+WORKDIR ${LAMBDA_TASK_ROOT}
+
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+
+COPY archive.py .
 
 CMD ["archive.handler"]
 
