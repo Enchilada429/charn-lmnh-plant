@@ -41,6 +41,8 @@ resource "aws_ecr_repository" "charn-pipeline-ecr" {
   image_scanning_configuration {
     scan_on_push = true
   }
+
+  force_delete = true
 }
 
 # repo for the archive lambda function
@@ -51,6 +53,8 @@ resource "aws_ecr_repository" "charn-archive-ecr" {
   image_scanning_configuration {
     scan_on_push = true
   }
+
+  force_delete = true
 }
 
 # repo for the dashboard ecs service
@@ -61,6 +65,8 @@ resource "aws_ecr_repository" "charn-dashboard-ecr" {
   image_scanning_configuration {
     scan_on_push = true
   }
+
+  force_delete = true
 }
 ########################################################
 
@@ -96,6 +102,23 @@ data "aws_ecr_image" "ecs-image-dashboard" {
 ################################################## 
 
 
+################### LB Target Group ################### 
+
+# target group for the load balancer
+resource "aws_lb_target_group" "c21-charn-target-group" {
+  name = "c21-charn-target-group"
+  port = 8501
+  protocol = "HTTP"
+  target_type = "ip"
+  vpc_id = data.aws_vpc.cohort-vpc.id
+}
+
+# data "aws_lb_target_group" "c21-charn-lb-target-group" {
+#   name = "c21-charn-target-group"
+# }
+######################################################## 
+
+
 ################### Load Balancer / Listener ################### 
 
 # load balancer for ECS dashboard service
@@ -120,19 +143,6 @@ resource "aws_lb_listener" "c21-charn-lb-listener" {
   }
 }
 ##################################################### 
-
-
-################### LB Target Group ################### 
-
-# target group for the load balancer
-resource "aws_lb_target_group" "c21-charn-target-group" {
-  name = "c21-charn-target-group"
-  port = 8501
-  protocol = "HTTP"
-  target_type = "ip"
-  vpc_id = data.aws_vpc.cohort-vpc.id
-}
-######################################################## 
 
 
 ################### Policy Documents ################### 
@@ -379,8 +389,14 @@ resource "aws_ecs_task_definition" "ecs-dashboard-task-definition" {
   execution_role_arn = aws_iam_role.ecs-execution-dashboard-role.arn
   task_role_arn = aws_iam_role.ecs-task-definition-role-dashboard.arn
   network_mode = "awsvpc"
-  cpu = 1024
-  memory = 2048
+  cpu = "1024"
+  memory = "2048"
+
+  runtime_platform {
+      operating_system_family = "LINUX"
+      cpu_architecture = "X86_64"
+    }
+
   container_definitions = jsonencode([
     {
         name = "c21-charn-dashboard-container"
