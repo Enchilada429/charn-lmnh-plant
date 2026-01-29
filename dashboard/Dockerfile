@@ -13,10 +13,12 @@ RUN pip3 install -r requirements.txt
 
 COPY load_data.py .
 
+COPY load_s3_data.py .
+
 COPY charts.py .
 
 COPY dashboard.py .
 
 COPY pages/archive_page.py .
 
-CMD ["python", "dashboard.py"]
+CMD ["streamlit run", "dashboard.py"]

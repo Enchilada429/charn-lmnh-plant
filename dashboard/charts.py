@@ -21,22 +21,24 @@ def bar_chart(data, x_col, y_col, title):
     )
 
 
-def plot_temp_over_time(conn, df):
+def plot_temp_over_time(df):
     """Plots temperature over time for each plant."""
     chart = alt.Chart(df).mark_line(point=True).encode(
         x=alt.X("recording_taken:T", title="Time"),
-        y=alt.Y("temperature:Q", title="Temperature")
+        y=alt.Y("temperature:Q", title="Temperature"),
+        color=alt.value('purple')
     ).properties(
         title="Temperature over Time"
     )
     return chart
 
 
-def plot_moisture_over_time(conn, df):
+def plot_moisture_over_time(df):
     """Plots soil moisture over time for each plant."""
     chart = alt.Chart(df).mark_line(point=True).encode(
         x=alt.X("recording_taken:T", title="Time"),
-        y=alt.Y("soil_moisture:Q", title="Soil Moisture")
+        y=alt.Y("soil_moisture:Q", title="Soil Moisture"),
+        color=alt.value('purple')
     ).properties(
         title="Soil Moisture over Time"
     )
