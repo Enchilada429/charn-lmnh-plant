@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 from extract import extract
 from transform import transform_data
-from load import get_db_connection, upload_recording_to_database
+from load import get_db_connection, upload_data_to_database
 
 logger = getLogger()
 logger.setLevel(INFO)
@@ -24,7 +24,7 @@ def handler(event=None, context=None):
     extracted_data = extract()
     cleaned_data = transform_data(extracted_data)
     conn = get_db_connection(ENV)
-    upload_recording_to_database(conn, cleaned_data)
+    upload_data_to_database(conn, cleaned_data)
 
     conn.close()
 

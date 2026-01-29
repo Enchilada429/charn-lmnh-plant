@@ -6,6 +6,7 @@ from os import environ as ENV, _Environ
 
 import pyodbc
 from dotenv import load_dotenv
+from pandas import DataFrame
 
 from extract import extract
 from transform import transform_data
@@ -206,17 +207,17 @@ def get_or_create_origin_location_id(cur: pyodbc.Cursor, city: str, country_id: 
     return int(cur.fetchone()[0])
 
 
-def upload_recording_to_database(conn: pyodbc.Connection, recording) -> None:
+def upload_data_to_database(conn: pyodbc.Connection, data_df: DataFrame) -> None:
     """Inserts cleaned data into the database, creating any missing related records before inserting the final rows."""
 
     start_time = perf_counter()
 
-    logger.info(f"Upload started of {len(recording)} recordings.")
+    logger.info(f"Upload started for {len(data_df)} entries.")
 
-    recording_to_insert = []
+    data_to_insert = []
 
     with conn.cursor() as curs:
-        for _, row in recording.iterrows():
+        for _, row in data_df.iterrows():
             country_id = get_or_create_country_id(curs, row["origin_country"])
 
             botanist_id = get_or_create_botanist_id(
@@ -247,7 +248,7 @@ def upload_recording_to_database(conn: pyodbc.Connection, recording) -> None:
                 row["license_url"],
                 row["thumbnail"])
 
-            recording_to_insert.append((
+            data_to_insert.append((
                 plant_id,
                 botanist_id,
                 origin_location_id,
@@ -267,12 +268,12 @@ def upload_recording_to_database(conn: pyodbc.Connection, recording) -> None:
         """
 
         curs.fast_executemany = True
-        curs.executemany(query, recording_to_insert)
+        curs.executemany(query, data_to_insert)
 
     conn.commit()
 
     logger.info(
-        f"Upload finished of {len(recording_to_insert)} recording data with time taken: {perf_counter() - start_time} seconds.")
+        f"Upload finished of {len(data_to_insert)} data points with time taken: {perf_counter() - start_time} seconds.")
 
 
 if __name__ == "__main__":
@@ -286,6 +287,6 @@ if __name__ == "__main__":
 
     conn = get_db_connection(ENV)
     try:
-        upload_recording_to_database(conn, df_transformed)
+        upload_data_to_database(conn, df_transformed)
     finally:
         conn.close()
