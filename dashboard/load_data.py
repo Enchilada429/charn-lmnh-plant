@@ -42,10 +42,5 @@ def load_data() -> pd.DataFrame:
         ON (r.plant_id=p.plant_id)
         ORDER BY recording_taken;
         """
-    # with conn.cursor() as cur:
-    #         cur.execute(query)
-    #         data = cur.fetchall()
-    # conn.close()
-    # print([row for row in data])
     df = pd.read_sql_query(query, conn)
     return df
