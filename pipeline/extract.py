@@ -9,6 +9,7 @@ import asyncio
 logger = getLogger(__name__)
 
 PLANT_ENDPOINT = "https://tools.sigmalabs.co.uk/api/plants/"
+BATCH_SIZE = 60
 
 
 async def get_plant_data(session: aiohttp.ClientSession, id: int) -> dict:
@@ -32,7 +33,7 @@ async def get_all_plants_data(batch_processing_size: int) -> list[dict]:
     async with aiohttp.ClientSession() as session:
         while plants_left:
             tasks = [get_plant_data(session, id)
-                    for id in range(id_counter, id_counter + batch_processing_size)]
+                     for id in range(id_counter, id_counter + batch_processing_size)]
 
             results = await asyncio.gather(*tasks)
 
@@ -59,7 +60,7 @@ def extract() -> list[dict]:
 
     start_time = perf_counter()
 
-    data = asyncio.run(get_all_plants_data(batch_processing_size=20))
+    data = asyncio.run(get_all_plants_data(batch_processing_size=BATCH_SIZE))
 
     logger.info(
         f"Extraction finished with time taken: {perf_counter() - start_time} seconds.")
