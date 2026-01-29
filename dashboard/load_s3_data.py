@@ -18,7 +18,7 @@ def get_s3_client(config: _Environ) -> client:
     )
 
 
-def get_object_list(s3_client: S3Client, bucket_name: str, regex: str = r".") -> list[str]:
+def get_object_list(s3_client: S3Client, bucket_name: str, regex: str=r".*\.csv$") -> list[str]:
     """Returns a list of objects inside the S3 bucket.
     Optional regex parameter to specify object names wanted."""
 
