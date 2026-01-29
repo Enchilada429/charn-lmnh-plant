@@ -32,4 +32,12 @@ If you want to upload a Docker image of this pipeline to your AWS ECR, run the f
 sh dockerise.sh
 ```
 
-You will be given prompts to enter your `AWS_ACCOUNT_ID`, `AWS_REGION`, and `AWS_ECR_REPO` name. These can all be found on AWS.
+## Potential issues
+
+When running `sh dockerise.sh`, you may run into this error:
+```
+Your session has expired. Please reauthenticate using 'aws login'.error: cannot perform an interactive login from a non TTY device
+```
+
+To fix this, ensure you have the [aws command line](https://aws.amazon.com/cli/) installed on your local machine, and then run the command `aws login`.
+This should open an AWS window on your default browser, and you should select the account to authenticate. After this you're prompted to leave the site and you should be able to run `sh dockerise.sh` again.
