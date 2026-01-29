@@ -7,10 +7,15 @@ There must be a `.env` file in the `pipeline` directory with the following conte
 ```
 DB_HOST=XXXX
 DB_PORT=1433
-DB_USER=XXXX
+DB_USERNAME=XXXX
 DB_PASSWORD=XXXX
 DB_NAME=XXXX
 DB_SCHEMA=XXXX
+DB_DRIVER=ODBC Driver 18 for SQL Server
+
+AWS_ACCOUNT_ID = XXXX
+AWS_REPO_NAME  = XXXX
+AWS_REGION          = XXXX
 ```
 
 ## Quick Start
