@@ -58,3 +58,6 @@ Next, run the following commands in the following order:
 - aws_scheduler_schedule | c21-charn-archive-schedule: The archive eventbridge schedule, triggering the lambda every day at 11:59pm on a cron-based schedule.
 - aws_s3_bucket | c21-charn-archive-bucket: The s3 bucket in which the archived data from the RDS database is uploaded to and eventually hosted on the dashboard.
 
+## Important Information
+
+- If the terraform is being ran for the first time, there should be no errors, but if the terraform script is run again, you may run into some errors which state that some resources already exist. These are safe to ignore, since if the resources exist we can reference and use them at will.
