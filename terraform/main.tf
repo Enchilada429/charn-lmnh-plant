@@ -24,8 +24,8 @@ data "aws_subnets" "public-subnets" {
   }
 
   filter {
-    name   = "tag:Tier"
-    values = ["public"]
+    name   = "tag:Name"
+    values = ["c21-public-subnet-*"]
   }
 }
 ###############################################
