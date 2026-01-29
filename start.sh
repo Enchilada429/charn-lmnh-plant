@@ -25,22 +25,23 @@ terraform apply -auto-approve \
     -target=aws_ecr_repository.c21-charn-dashboard-ecr \
     -target=aws_ecr_repository.c21-charn-archive-ecr
 
+cd ..
 
 log "🌱 Building & pushing pipeline image..."
 cd "$PIPELINE_DIR"
-./dockerise.sh
+sh ./dockerise.sh
 cd ..
 
 
 log "🌱 Building & pushing dashboard image..."
 cd "$DASHBOARD_DIR"
-./dockerise.sh
+sh ./dockerise.sh
 cd ..
 
 
 log "🌱 Building & pushing archive image..."
 cd "$ARCHIVE_DIR"
-./dockerise.sh
+sh ./dockerise.sh
 cd ..
 
 

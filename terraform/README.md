@@ -60,4 +60,12 @@ Next, run the following commands in the following order:
 
 ## Important Information
 
-- If the terraform is being ran for the first time, there should be no errors, but if the terraform script is run again, you may run into some errors which state that some resources already exist. These are safe to ignore, since if the resources exist we can reference and use them at will.
+- If the terraform is being ran for the first time, there should be no errors, but if the terraform script is run again, you may run into some errors which state that some resources already exist. To fix this, run each of the following commands in succession:
+
+1. `terraform import aws_lb_target_group.c21-charn-target-group arn:aws:elasticloadbalancing:eu-west-2:129033205317:targetgroup/c21-charn-target-group/e4b8363ff90f43cb`
+2. `terraform import aws_iam_policy.task-definition-role-permissions-policy-dashboard arn:aws:iam::129033205317:policy/c21-charn-dashboard-permissions-policy`
+3. `terraform import aws_iam_role.ecs-execution-dashboard-role c21-charn-ecs-execution-dashboard-role`
+4. `terraform import aws_iam_role.ecs-task-definition-role-dashboard c21-charn-ecs-task-definition-role-dashboard`
+
+
+

@@ -41,6 +41,8 @@ resource "aws_ecr_repository" "charn-pipeline-ecr" {
   image_scanning_configuration {
     scan_on_push = true
   }
+
+  force_delete = true
 }
 
 # repo for the archive lambda function
@@ -51,6 +53,8 @@ resource "aws_ecr_repository" "charn-archive-ecr" {
   image_scanning_configuration {
     scan_on_push = true
   }
+
+  force_delete = true
 }
 
 # repo for the dashboard ecs service
@@ -61,6 +65,8 @@ resource "aws_ecr_repository" "charn-dashboard-ecr" {
   image_scanning_configuration {
     scan_on_push = true
   }
+
+  force_delete = true
 }
 ########################################################
 
@@ -111,7 +117,7 @@ resource "aws_lb" "c21-charn-ecs-load-balancer" {
 # listener for load balancer
 resource "aws_lb_listener" "c21-charn-lb-listener" {
   load_balancer_arn = aws_lb.c21-charn-ecs-load-balancer.arn
-  port = 8501
+  port = 8502
   protocol = "HTTP"
 
   default_action {
@@ -127,11 +133,12 @@ resource "aws_lb_listener" "c21-charn-lb-listener" {
 # target group for the load balancer
 resource "aws_lb_target_group" "c21-charn-target-group" {
   name = "c21-charn-target-group"
-  port = 8501
+  port = 8502
   protocol = "HTTP"
   target_type = "ip"
   vpc_id = data.aws_vpc.cohort-vpc.id
 }
+
 ######################################################## 
 
 
@@ -379,8 +386,14 @@ resource "aws_ecs_task_definition" "ecs-dashboard-task-definition" {
   execution_role_arn = aws_iam_role.ecs-execution-dashboard-role.arn
   task_role_arn = aws_iam_role.ecs-task-definition-role-dashboard.arn
   network_mode = "awsvpc"
-  cpu = 1024
-  memory = 2048
+  cpu = "1024"
+  memory = "2048"
+
+  runtime_platform {
+      operating_system_family = "LINUX"
+      cpu_architecture = "X86_64"
+    }
+
   container_definitions = jsonencode([
     {
         name = "c21-charn-dashboard-container"
@@ -390,8 +403,8 @@ resource "aws_ecs_task_definition" "ecs-dashboard-task-definition" {
         essential = true
         portMappings = [
             {
-                containerPort = 8501
-                hostPort = 8501
+                containerPort = 8502
+                hostPort = 8502
             }
         ]
 
@@ -452,7 +465,7 @@ resource "aws_ecs_service" "ecs-dashboard-service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.c21-charn-target-group.arn
     container_name = "c21-charn-dashboard-container"
-    container_port = 8501
+    container_port = 8502
   }
 
   network_configuration {
