@@ -1,26 +1,11 @@
 FROM python:latest
 
-ARG UNIXODBC_VERSION=2.3.12
+RUN apt-get update && apt-get install -y curl unixodbc odbcinst
+RUN curl -sSL -O https://packages.microsoft.com/config/debian/$(grep VERSION_ID /etc/os-release | cut -d '"' -f 2 | cut -d '.' -f 1)/packages-microsoft-prod.deb
+RUN dpkg -i packages-microsoft-prod.deb
+RUN rm packages-microsoft-prod.deb
 
-RUN dnf install -y gzip tar openssl-devel gcc gcc-c++ make automake kernel-devel
-
-RUN curl ftp://ftp.unixodbc.org/pub/unixODBC/unixODBC-${UNIXODBC_VERSION}.tar.gz -O \
-    && tar xzvf unixODBC-${UNIXODBC_VERSION}.tar.gz \
-    && cd unixODBC-${UNIXODBC_VERSION} \
-    && ./configure --sysconfdir=/opt --disable-gui --disable-drivers --enable-iconv --with-iconv-char-enc=UTF8 --with-iconv-ucode-enc=UTF16LE --prefix=/opt \
-    && make \
-    && make install
-
-RUN curl https://packages.microsoft.com/config/rhel/9/prod.repo > /etc/yum.repos.d/mssql-release.repo
-RUN dnf install -y e2fsprogs fuse-libs libss
-RUN ACCEPT_EULA=Y dnf install -y msodbcsql18
-
-ENV CFLAGS="-I/opt/include"
-ENV LDFLAGS="-L/opt/lib"
-
-RUN mkdir /opt/python/ && cd /opt/python/ && pip install pyodbc -t .
-
-RUN dnf install -y openssl
+RUN apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql18
 
 COPY requirements.txt .
 
@@ -30,8 +15,8 @@ COPY load_data.py .
 
 COPY charts.py .
 
-COPY pages/archive_pages.py .
-
 COPY dashboard.py .
+
+COPY pages/archive_page.py .
 
 CMD ["python", "dashboard.py"]
