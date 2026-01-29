@@ -21,4 +21,4 @@ COPY dashboard.py .
 
 COPY pages/archive_page.py .
 
-CMD ["python", "dashboard.py"]
+CMD ["streamlit run", "dashboard.py"]
