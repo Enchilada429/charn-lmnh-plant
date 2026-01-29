@@ -12,6 +12,10 @@ DB_PASSWORD=XXXX
 DB_NAME=XXXX
 DB_SCHEMA=XXXX
 DB_DRIVER=ODBC Driver 18 for SQL Server
+
+AWS_ACCOUNT_ID = xxxx
+AWS_REPO_NAME  = xxxx
+AWS_REGION          = xxxx
 ```
 
 ## Quick Start
