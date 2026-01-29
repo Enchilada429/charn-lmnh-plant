@@ -50,5 +50,6 @@ There must also be S3 bucket credentials for the `archive` page on the dashboard
 ```
 AWS_SECRET_KEY=XXXX
 AWS_ACCESS_KEY=XXXX
+AWS_REGION=XXXX
 S3_BUCKET=XXXX
 ```
