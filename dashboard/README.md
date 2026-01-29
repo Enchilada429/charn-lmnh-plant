@@ -13,12 +13,8 @@ This folder contains all necessary scripts and requirements to run a fully-funct
 To run the dashboard, run the following command:
 
 ```
-streamlit run dashboard.py --source [data_source]
+streamlit run dashboard.py
 ```
-- There are two options for the --source argument: 'csv' or 'db'
-    - 'db': Connects to the AWS RDS for real-time streaming.
-    - 'csv': This will plot the data from a CSV. The name of the CSV *must* be added as an argument when the data source is 'csv'.
-
 
 ## Docker & Uploading Image to AWS ECR 🐳🌾
 
