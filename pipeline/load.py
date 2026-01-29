@@ -61,8 +61,22 @@ def add_id_to_cache(id_collection_name: str, id_info: str, id: int) -> None:
         ID_CACHE[id_collection_name][id_info] = id
 
 
-def get_or_create_country_id(conn: pyodbc.Connection, country_name: str) -> int:
-    """Gets or creates country_id"""
+def generate_country_id(conn: pyodbc.Connection, country_name: str) -> int:
+    """Creates a new country row with given country name.
+    Returns the id of the new country."""
+
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO beta.country (country_name) OUTPUT country_id VALUES (?);",
+            (country_name,),
+        )
+
+        return int(cur.fetchone()[0])
+
+
+def get_country_id(conn: pyodbc.Connection, country_name: str) -> int:
+    """Returns the country id given a country name.
+    Will make a new country in the database if invalid."""
 
     cached_id = get_id_from_cache("country_ids", country_name)
 
@@ -75,25 +89,32 @@ def get_or_create_country_id(conn: pyodbc.Connection, country_name: str) -> int:
             (country_name,),
         )
         row = cur.fetchone()
-        if row:
-            id = int(row[0])
-            add_id_to_cache("country_ids", country_name, id)
-            return id
 
-        cur.execute(
-            "INSERT INTO beta.country (country_name) OUTPUT country_id VALUES (?);",
-            (country_name,),
-        )
-
-        id = int(cur.fetchone()[0])
-
-    add_id_to_cache("country_ids", country_name, id)
+    if row:
+        id = int(row[0])
+    else:
+        id = generate_country_id(conn, country_name)
+        add_id_to_cache("country_ids", country_name, id)
 
     return id
 
 
-def get_or_create_botanist_id(conn: pyodbc.Connection, name: str, email: str, phone: str):
-    """Gets or creates botanist_id"""
+def generate_botanist_id(conn: pyodbc.Connection, name: str, email: str, phone: str) -> int:
+    """Creates a new botanist row with given botanist details.
+    Returns the id of the new botanist."""
+
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO beta.botanist (botanist_name, email, phone) OUTPUT botanist_id VALUES (?, ?, ?);",
+            (name, email, phone),
+        )
+
+        return int(cur.fetchone()[0])
+
+
+def get_botanist_id(conn: pyodbc.Connection, name: str, email: str, phone: str):
+    """Returns the botanist id given the botanist details.
+    Will make a new botanist in the database if invalid."""
 
     cached_id = get_id_from_cache("botanist_ids", email)
 
@@ -106,25 +127,32 @@ def get_or_create_botanist_id(conn: pyodbc.Connection, name: str, email: str, ph
             (email,),
         )
         row = cur.fetchone()
-        if row:
-            id = int(row[0])
-            add_id_to_cache("botanist_ids", email, id)
-            return id
 
-        cur.execute(
-            "INSERT INTO beta.botanist (botanist_name, email, phone) OUTPUT botanist_id VALUES (?, ?, ?);",
-            (name, email, phone),
-        )
-
-        id = int(cur.fetchone()[0])
-
-    add_id_to_cache("botanist_ids", email, id)
+    if row:
+        id = int(row[0])
+    else:
+        id = generate_botanist_id(conn, name, email, phone)
+        add_id_to_cache("botanist_ids", email, id)
 
     return id
 
 
-def get_or_create_plant_id(conn: pyodbc.Connection, common_name: str, scientific_name: str | None) -> int:
-    """Gets or creates plant_id"""
+def generate_plant_id(conn: pyodbc.Connection, common_name: str, scientific_name: str | None) -> int:
+    """Creates a new plant row with given plant details.
+    Returns the id of the new plant."""
+
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO beta.plant (common_name, scientific_name) OUTPUT plant_id VALUES (?, ?);",
+            (common_name, scientific_name),
+        )
+
+        return int(cur.fetchone()[0])
+
+
+def get_plant_id(conn: pyodbc.Connection, common_name: str, scientific_name: str | None) -> int:
+    """Returns the plant id given the plant details.
+    Will make a new plant in the database if invalid."""
 
     cached_id = get_id_from_cache("plant_ids", common_name)
 
@@ -137,25 +165,32 @@ def get_or_create_plant_id(conn: pyodbc.Connection, common_name: str, scientific
             (common_name,),
         )
         row = cur.fetchone()
-        if row:
-            id = int(row[0])
-            add_id_to_cache("plant_ids", common_name, id)
-            return id
 
-        cur.execute(
-            "INSERT INTO beta.plant (common_name, scientific_name) OUTPUT plant_id VALUES (?, ?);",
-            (common_name, scientific_name),
-        )
-
-        id = int(cur.fetchone()[0])
-
-    add_id_to_cache("plant_ids", common_name, id)
+    if row:
+        id = int(row[0])
+    else:
+        id = generate_plant_id(conn, common_name, scientific_name)
+        add_id_to_cache("plant_ids", common_name, id)
 
     return id
 
 
-def get_or_create_image_id(conn: pyodbc.Connection, license: int, license_name: str, license_url: str, thumbnail: str | None) -> int:
-    """Gets or creates image_id"""
+def generate_image_id(conn: pyodbc.Connection, license: int, license_name: str, license_url: str, thumbnail: str | None) -> int:
+    """Creates a new image row with given image details.
+    Returns the id of the new image."""
+
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO beta.plant_image (licence, licence_name, licence_url, thumbnail) OUTPUT image_id VALUES (?, ?, ?, ?);",
+            (license, license_name, license_url, thumbnail,),
+        )
+
+        return int(cur.fetchone()[0])
+
+
+def get_image_id(conn: pyodbc.Connection, license: int, license_name: str, license_url: str, thumbnail: str | None) -> int:
+    """Returns the image id given the image details.
+    Will make a new image in the database if invalid."""
 
     cached_id = get_id_from_cache("image_ids", license)
 
@@ -168,25 +203,37 @@ def get_or_create_image_id(conn: pyodbc.Connection, license: int, license_name: 
             (license,),
         )
         row = cur.fetchone()
-        if row:
-            id = int(row[0])
-            add_id_to_cache("image_ids", license, id)
-            return id
 
-        cur.execute(
-            "INSERT INTO beta.plant_image (licence, licence_name, licence_url, thumbnail) OUTPUT image_id VALUES (?, ?, ?, ?);",
-            (license, license_name, license_url, thumbnail,),
-        )
-
-        id = int(cur.fetchone()[0])
-
-    add_id_to_cache("image_ids", license, id)
+    if row:
+        id = int(row[0])
+    else:
+        id = generate_image_id(
+            conn, license, license_name, license_url, thumbnail)
+        add_id_to_cache("image_ids", license, id)
 
     return id
 
 
-def get_or_create_origin_location_id(conn: pyodbc.Connection, city: str, country_id: int, longitude, latitude) -> int:
-    """Gets or creates location_id"""
+def generate_origin_location_id(conn: pyodbc.Connection, city: str, country_id: int, longitude: float, latitude: float) -> int:
+    """Creates a new origin location row with given origin location details.
+    Returns the id of the new origin location."""
+
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO beta.origin_location (origin_city_name, country_id, longitude, latitude)
+            OUTPUT origin_location_id
+            VALUES (?, ?, ?, ?);
+            """,
+            (city, country_id, longitude, latitude),
+        )
+
+        return int(cur.fetchone()[0])
+
+
+def get_origin_location_id(conn: pyodbc.Connection, city: str, country_id: int, longitude: float, latitude: float) -> int:
+    """Returns the origin location id given the origin location details.
+    Will make a new origin location in the database if invalid."""
 
     with conn.cursor() as cur:
         cur.execute(
@@ -198,19 +245,14 @@ def get_or_create_origin_location_id(conn: pyodbc.Connection, city: str, country
             (city, country_id),
         )
         row = cur.fetchone()
-        if row:
-            return int(row[0])
 
-        cur.execute(
-            """
-            INSERT INTO beta.origin_location (origin_city_name, country_id, longitude, latitude)
-            OUTPUT origin_location_id
-            VALUES (?, ?, ?, ?);
-            """,
-            (city, country_id, longitude, latitude),
-        )
+    if row:
+        id = int(row[0])
+    else:
+        id = generate_origin_location_id(
+            conn, city, country_id, longitude, latitude)
 
-    return int(cur.fetchone()[0])
+    return id
 
 
 def upload_data_to_database(conn: pyodbc.Connection, data_df: DataFrame) -> None:
@@ -223,22 +265,22 @@ def upload_data_to_database(conn: pyodbc.Connection, data_df: DataFrame) -> None
     data_to_insert = []
 
     for _, row in data_df.iterrows():
-        country_id = get_or_create_country_id(conn, row["origin_country"])
+        country_id = get_country_id(conn, row["origin_country"])
 
-        botanist_id = get_or_create_botanist_id(
+        botanist_id = get_botanist_id(
             conn,
             row["botanist_name"],
             row["email"],
             row["phone"],
         )
 
-        plant_id = get_or_create_plant_id(
+        plant_id = get_plant_id(
             conn,
             row["plant_name"],
             row["scientific_name"],
         )
 
-        origin_location_id = get_or_create_origin_location_id(
+        origin_location_id = get_origin_location_id(
             conn,
             row["origin_city"],
             country_id,
@@ -246,7 +288,7 @@ def upload_data_to_database(conn: pyodbc.Connection, data_df: DataFrame) -> None
             row["latitude"],
         )
 
-        image_id = get_or_create_image_id(
+        image_id = get_image_id(
             conn,
             row["license"],
             row["license_name"],
