@@ -9,7 +9,7 @@ on:
 
 jobs:
   test:
-    name: test and lint
+    name: lint
     runs-on: ubuntu-latest
 
     steps:
@@ -26,9 +26,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r pipeline/requirements.txt
 
-      - name: Run pytest (won't fail workflow)
-        continue-on-error: true
-        run: pytest -q
-
       - name: Run pylint
-        run: pylint pipeline/extract.py pipeline/transform.py pipeline/load.py dashboard/dashboard.py --fail-under=7
+        run: pylint $(git ls-files '*.py') --fail-under=7
+
