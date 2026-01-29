@@ -28,7 +28,7 @@ def display_archive_page() -> None:
     else:
         for csv in csv_files:
             url = generate_object_url(s3, bucket, csv)
-            st.markdown(f"📄 **{csv}**  \n[⬇️ Download]({url})")
+            st.markdown(f"📄 **{csv}** [⬇️ Download]({url})")
 
 
 if __name__ == '__main__':
