@@ -441,6 +441,10 @@ resource "aws_ecs_task_definition" "ecs-dashboard-task-definition" {
                 name  = "S3_BUCKET"
                 value = var.S3_BUCKET
             },
+            {
+                name  = "DB_DRIVER"
+                value = var.DB_DRIVER
+            }
         ]
     }
   ])
