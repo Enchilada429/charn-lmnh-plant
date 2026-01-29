@@ -50,7 +50,7 @@ def write_old_data_to_csv(conn, csv_path, columns):
         recording_taken,
         soil_moisture,
         temperature
-    FROM dbo.recording
+    FROM beta.recording
     WHERE recording_taken < DATEADD(hour, -24, GETUTCDATE());
     """
 
