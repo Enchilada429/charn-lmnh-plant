@@ -55,6 +55,16 @@ def convert_datatypes(df: pd.DataFrame) -> pd.DataFrame:
     df["longitude"] = pd.to_numeric(df["longitude"], errors="coerce")
     df["soil_moisture"] = pd.to_numeric(df["soil_moisture"], errors="coerce")
     df["temperature"] = pd.to_numeric(df["temperature"], errors="coerce")
+    df["scientific_name"] = df["scientific_name"].where(
+        df["scientific_name"].notna(), "None")
+    df["license"] = df["license"].where(
+        df["license"].notna(), 0)
+    df["license_url"] = df["license_url"].where(
+        df["license_url"].notna(), "None")
+    df["license_name"] = df["license_name"].where(
+        df["license_name"].notna(), "None")
+    df["thumbnail"] = df["thumbnail"].where(
+        df["thumbnail"].notna(), "None")
 
     return df
 
