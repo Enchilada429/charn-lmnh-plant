@@ -24,8 +24,8 @@ data "aws_subnets" "public-subnets" {
   }
 
   filter {
-    name   = "tag:Tier"
-    values = ["public"]
+    name   = "tag:Name"
+    values = ["c21-public-subnet-*"]
   }
 }
 ###############################################
@@ -394,41 +394,6 @@ resource "aws_ecs_task_definition" "ecs-dashboard-task-definition" {
                 hostPort = 8501
             }
         ]
-
-        environment = [
-            {
-                name  = "DB_HOST"
-                value = var.DB_HOST
-            },
-            {
-                name  = "DB_PORT"
-                value = "1433"
-            },
-            {
-                name  = "DB_USERNAME"
-                value = var.DB_USERNAME
-            },
-            {
-                name  = "DB_PASSWORD"
-                value = var.DB_PASSWORD
-            },
-            {
-                name  = "DB_NAME"
-                value = var.DB_NAME
-            },
-            {
-                name  = "AWS_SECRET_KEY"
-                value = var.AWS_SECRET_ACCESS_KEY
-            },
-            {
-                name  = "AWS_ACCESS_KEY"
-                value = var.AWS_ACCESS_KEY_ID
-            },
-            {
-                name  = "S3_BUCKET"
-                value = var.S3_BUCKET
-            },
-        ]
     }
   ])
 }
@@ -473,17 +438,6 @@ resource "aws_lambda_function" "charn-pipeline-lambda" {
   image_uri     = data.aws_ecr_image.lambda-image-pipeline.image_uri
   timeout       = 300
   memory_size   = 512
-
-  environment {
-    variables = {
-        DB_DRIVER   = var.DB_DRIVER
-        DB_HOST     = var.DB_HOST
-        DB_NAME     = var.DB_NAME
-        DB_USERNAME = var.DB_USERNAME
-        DB_PORT     = "1433"
-        DB_PASSWORD = var.DB_PASSWORD
-    }
-  }
 }
 
 # daily lambda archive function
@@ -494,18 +448,6 @@ resource "aws_lambda_function" "charn-archive-lambda" {
   image_uri     = data.aws_ecr_image.lambda-image-archive.image_uri
   timeout       = 300
   memory_size   = 512
-
-  environment {
-    variables = {
-        DB_DRIVER   = var.DB_DRIVER
-        DB_HOST     = var.DB_HOST
-        DB_NAME     = var.DB_NAME
-        DB_USERNAME = var.DB_USERNAME
-        DB_PORT     = "1433"
-        DB_PASSWORD = var.DB_PASSWORD
-        S3_BUCKET   = var.S3_BUCKET
-    }
-  }
 }
 ######################################################## 
 
