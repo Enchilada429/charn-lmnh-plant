@@ -27,15 +27,10 @@ def get_object_list(s3_client: S3Client, bucket_name: str, regex: str=r".*\.csv$
     return [object["Key"] for object in objects if match(regex, object["Key"])]
 
 
-def generate_object_url(s3_client: S3Client, bucket_name: str, object_name: str) -> str:
+def generate_object_url(bucket_name: str, object_name: str) -> str:
     """Returns a download link to object in S3 bucket."""
 
-    return s3_client.generate_presigned_url("get_object",
-                                            Params={
-                                                "Bucket": bucket_name,
-                                                "Key": object_name
-                                            },
-                                            ExpiresIn=60)
+    return f"https://{bucket_name}.s3.{ENV["AWS_REGION"]}.amazonaws.com/{object_name}"
 
 
 def get_all_object_urls(s3_client: S3Client, bucket_name: str) -> dict:
@@ -43,7 +38,7 @@ def get_all_object_urls(s3_client: S3Client, bucket_name: str) -> dict:
 
     object_list = get_object_list(s3_client, bucket_name)
 
-    return {object_name: generate_object_url(s3_client, bucket_name, object_name) for object_name in object_list}
+    return {object_name: generate_object_url(bucket_name, object_name) for object_name in object_list}
 
 
 if __name__ == "__main__":
