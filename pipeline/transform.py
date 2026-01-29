@@ -114,4 +114,4 @@ if __name__ == "__main__":
     extracted_data = extract()
     df_transformed = transform_data(extracted_data)
 
-    print(df_transformed.head(100))
+    print(df_transformed.head(50))
