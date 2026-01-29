@@ -7,34 +7,13 @@ import pandas as pd
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 from dotenv import load_dotenv
+
 from load_data import load_data
 from charts import bar_chart
 
-def parse_args():
-    """Handles argument functionality for running the dashboard."""
-    parser = ArgumentParser()
-    parser.add_argument(
-    "--source",
-    choices=["csv", "db"],
-    default="db",
-    help="Data source for dashboard")
-    
-    parser.add_argument(
-    "--csv",
-    dest="csv_path",
-    help="Path to CSV file (required when --source csv)",)
-    args = parser.parse_args()
-    
-    return args
-
-if __name__ == '__main__':
-    load_dotenv()
-    args = parse_args()
-    
-    plant_recordings = load_data(
-        source=args.source,
-        csv_path=args.csv_path,
-    )
+def display_dashboard():
+    """Outputs the main visualisations of the dashboard."""
+    plant_recordings = load_data()
 
     top_5_temp = plant_recordings.nlargest(5, "temperature")
     bottom_5_temp = plant_recordings.nsmallest(5, "temperature")
@@ -85,4 +64,8 @@ if __name__ == '__main__':
         sorted(plant_recordings["plant_name"].dropna().unique())
     )
     plant_df = plant_recordings[plant_recordings["plant_name"] == plant].sort_values("recording_taken")
+
+if __name__ == '__main__':
+    load_dotenv()
+    args = parse_args()
     

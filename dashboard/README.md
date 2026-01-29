@@ -41,8 +41,8 @@ DB_USER=XXXX
 DB_PASSWORD=XXXX
 DB_NAME=XXXX
 DB_SCHEMA=XXXX
+DB_DRIVER=XXXX
 ```
-
 These are necessary to connect to the RDS and thus display the data.
 
 There must also be S3 bucket credentials for the `archive` page on the dashboard. This requires the additional credentials in the `.env`:
