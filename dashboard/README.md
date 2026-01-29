@@ -28,7 +28,7 @@ If you want to upload a Docker image of this dashboard to your AWS ECR, run the 
 sh dockerise.sh
 ```
 
-You will be given prompts to enter your `AWS_ACCOUNT_ID`, `AWS_REGION`, and `AWS_ECR_REPO` name. These can all be found on AWS.
+You will be given prompts to enter your `AWS_ACCOUNT_ID`, `AWS_REGION`. These can all be found on AWS.
 
 ### Environment Variables 🌎🌹
 

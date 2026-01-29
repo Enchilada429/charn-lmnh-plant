@@ -24,8 +24,8 @@ def build_dataframe(records: list[dict]) -> pd.DataFrame:
             else None,
 
             "botanist_name": r["botanist"]["name"],
-            "botanist_email": r["botanist"]["email"],
-            "botanist_phone": r["botanist"]["phone"],
+            "email": r["botanist"]["email"],
+            "phone": r["botanist"]["phone"],
 
             "origin_city": r["origin_location"]["city"],
             "origin_country": r["origin_location"]["country"],
@@ -65,6 +65,10 @@ def convert_datatypes(df: pd.DataFrame) -> pd.DataFrame:
         df["license_name"].notna(), "None")
     df["thumbnail"] = df["thumbnail"].where(
         df["thumbnail"].notna(), "None")
+    df["email"] = df["email"].where(
+        df["email"].notna(), "None")
+    df["phone"] = df["phone"].where(
+        df["phone"].notna(), "None")
 
     return df
 

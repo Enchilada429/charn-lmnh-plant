@@ -165,8 +165,8 @@ def upload_recording_to_database(conn, recording) -> None:
             botanist_id = get_or_create_botanist_id(
                 curs,
                 row["botanist_name"],
-                row["botanist_email"],
-                row["botanist_phone"],
+                row["email"],
+                row["phone"],
             )
 
             plant_id = get_or_create_plant_id(
