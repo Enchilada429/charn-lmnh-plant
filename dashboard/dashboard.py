@@ -129,7 +129,7 @@ def display_dashboard(plant_recordings: pd.DataFrame, plant_collection: Plants):
 
         st.info(f"Current temperature: {plant_obj.temperature:.2f} ºC")
         st.info(f"Recording taken: {plant_obj.recording_taken}")
-        st.info(f"Last watered: {plant_obj.recording_taken}")
+        st.info(f"Last watered: {plant_obj.last_watered}")
 
     with col2:
         st.altair_chart(
@@ -150,7 +150,7 @@ if __name__ == '__main__':
         st.session_state.plant_collection = get_plant_collection(
             st.session_state.df)
 
-    st_autorefresh(interval=60000, key='refresh')
+    st_autorefresh(interval=30000, key='refresh')
 
     display_dashboard(st.session_state.df, st.session_state.plant_collection)
 
@@ -159,6 +159,8 @@ if __name__ == '__main__':
 
     st.session_state.df = st.session_state.df[st.session_state.df["recording_taken"] > datetime.now(
     ) - timedelta(days=1)]
+
+    st.session_state.df = st.session_state.df.drop_duplicates(keep=False)
 
     update_plant_collection(
         st.session_state.plant_collection, st.session_state.df)
