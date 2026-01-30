@@ -12,29 +12,55 @@ from charts import bar_chart, plot_temp_over_time, plot_moisture_over_time
 from classes import Plants, Plant, Botanist, Origin, Image
 
 
-def get_initial_plant_collection(plant_recordings: pd.DataFrame) -> Plants:
+def get_latest_recording_for_plant(plant_recordings: pd.DataFrame, plant_name: str) -> dict:
+    """Returns a dict for the latest recording for the plant."""
+
+    plant_df = plant_recordings[plant_recordings["common_name"] == plant_name]
+    plant_df = plant_df.sort_values(
+        by=["recording_taken"], ascending=False)
+
+    latest_row = plant_df.head(1)
+
+    return {
+        "common_name": latest_row.iloc[0]["common_name"],
+        "soil_moisture": latest_row.iloc[0]["soil_moisture"],
+        "temperature": latest_row.iloc[0]["temperature"],
+        "recording_taken": latest_row.iloc[0]["recording_taken"]
+    }
+
+
+def get_plant_collection(plant_recordings: pd.DataFrame) -> Plants:
     """Returns a Plants object which is a collection of plants
     based on the plants information extracted from the data."""
 
     plant_collection = Plants()
 
     for plant_name in plant_recordings["common_name"].dropna().unique():
-        plant_df = plant_recordings[plant_recordings["common_name"] == plant_name]
-        plant_df = plant_df.sort_values(
-            by=["recording_taken"], ascending=False)
-
-        latest_row = plant_df.head(1)
+        latest_recording = get_latest_recording_for_plant(
+            plant_recordings, plant_name)
 
         plant_collection.add_plant(
             Plant(
-                common_name=latest_row.iloc[0]["common_name"],
-                soil_moisture=latest_row.iloc[0]["soil_moisture"],
-                temperature=latest_row.iloc[0]["temperature"],
-                recording_taken=latest_row.iloc[0]["recording_taken"]
+                common_name=latest_recording["common_name"],
+                soil_moisture=latest_recording["soil_moisture"],
+                temperature=latest_recording["temperature"],
+                recording_taken=latest_recording["recording_taken"]
             )
         )
 
     return plant_collection
+
+
+def update_plant_collection(plant_collection: Plants, plant_recordings: pd.DataFrame) -> None:
+    """Updates fields in the plant collection based on new data."""
+
+    for plant in plant_collection.plants:
+        latest_recording = get_latest_recording_for_plant(
+            plant_recordings, plant.common_name)
+
+        plant.soil_moisture = latest_recording["soil_moisture"]
+        plant.temperature = latest_recording["temperature"]
+        plant.recording_taken = latest_recording["recording_taken"]
 
 
 def display_dashboard(plant_recordings: pd.DataFrame, plant_collection: Plants):
@@ -103,6 +129,8 @@ def display_dashboard(plant_recordings: pd.DataFrame, plant_collection: Plants):
         plant_obj = plant_collection.get_plant(plant)
 
         st.info(f"Current temperature: {plant_obj.temperature:.2f} ºC")
+        st.info(f"Recording taken: {plant_obj.recording_taken}")
+        st.info(f"Last watered: {plant_obj.recording_taken}")
 
     with col2:
         st.altair_chart(
@@ -117,10 +145,14 @@ if __name__ == '__main__':
 
     conn = get_db_connection(ENV)
 
-    st_autorefresh(interval=5000, key='refresh')
+    df = load_data(conn)
+
+    plant_collection = get_plant_collection(df)
+
+    st_autorefresh(interval=60000, key='refresh')
 
     df = load_data(conn)
 
-    plant_collection = get_initial_plant_collection(df)
+    update_plant_collection(plant_collection, df)
 
     display_dashboard(df, plant_collection)

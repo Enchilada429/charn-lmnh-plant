@@ -39,6 +39,7 @@ def load_data(_conn: Connection) -> pd.DataFrame:
         SELECT r.plant_id, p.common_name, recording_taken, temperature, soil_moisture 
         FROM beta.recording r JOIN beta.plant p
         ON (r.plant_id=p.plant_id)
+        WHERE recording_taken >= DATEADD(hour, -24, GETDATE())
         ORDER BY recording_taken;
         """
     df = pd.read_sql_query(query, _conn)
