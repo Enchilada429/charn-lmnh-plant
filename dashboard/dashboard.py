@@ -1,11 +1,13 @@
 """Script for hosting the dashboard for the past 24 hours of data."""
 
+from os import environ as ENV
+
 import pandas as pd
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 from dotenv import load_dotenv
 
-from load_data import load_data
+from load_data import get_db_connection, load_data
 from charts import bar_chart, plot_temp_over_time, plot_moisture_over_time
 from classes import Plants, Plant, Botanist, Origin, Image
 
@@ -113,9 +115,11 @@ def display_dashboard(plant_recordings: pd.DataFrame, plant_collection: Plants):
 if __name__ == '__main__':
     load_dotenv()
 
+    conn = get_db_connection(ENV)
+
     st_autorefresh(interval=5000, key='refresh')
 
-    df = load_data()
+    df = load_data(conn)
 
     plant_collection = get_initial_plant_collection(df)
 
