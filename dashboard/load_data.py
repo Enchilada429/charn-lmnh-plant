@@ -31,7 +31,8 @@ def get_db_connection(_config: _Environ) -> Connection:
 
     return conn
 
-def load_data(_conn: Connection, past_mins: int) -> pd.DataFrame:
+
+def load_data(conn: Connection, past_mins: int) -> pd.DataFrame:
     """This loads the cleaned plant recording data."""
     query = f"""
         SELECT r.plant_id, p.common_name, recording_taken, temperature, soil_moisture 
@@ -40,5 +41,5 @@ def load_data(_conn: Connection, past_mins: int) -> pd.DataFrame:
         WHERE recording_taken >= DATEADD(minute, {-1 * past_mins}, GETDATE())
         ORDER BY recording_taken;
         """
-    df = pd.read_sql_query(query, _conn)
+    df = pd.read_sql_query(query, conn)
     return df

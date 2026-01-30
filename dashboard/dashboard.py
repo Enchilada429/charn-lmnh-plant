@@ -1,7 +1,7 @@
 """Script for hosting the dashboard for the past 24 hours of data."""
 
 from os import environ as ENV
-from time import sleep
+from datetime import datetime, timedelta
 
 import pandas as pd
 import streamlit as st
@@ -67,8 +67,6 @@ def update_plant_collection(plant_collection: Plants, plant_recordings: pd.DataF
 def display_dashboard(plant_recordings: pd.DataFrame, plant_collection: Plants):
     """Outputs the main visualisations of the dashboard."""
 
-    st.error("Error!")
-
     top_5_temp = plant_recordings.nlargest(5, "temperature")
     bottom_5_temp = plant_recordings.nsmallest(5, "temperature")
     top_5_moist = plant_recordings.nlargest(5, "soil_moisture")
@@ -89,7 +87,7 @@ def display_dashboard(plant_recordings: pd.DataFrame, plant_collection: Plants):
         st.subheader("Temperature Extremes")
         st.altair_chart(
             bar_chart(top_5_temp, "temperature",
-                       "common_name", "Highest Temperatures")
+                      "common_name", "Highest Temperatures")
         )
 
         st.altair_chart(
@@ -142,19 +140,25 @@ def display_dashboard(plant_recordings: pd.DataFrame, plant_collection: Plants):
 
 
 if __name__ == '__main__':
-    load_dotenv()
 
-    conn = get_db_connection(ENV)
-    print("Loading entire dataset...")
-    df = load_data(conn, 1440)
+    if "initialised" not in st.session_state:
+        st.session_state.initialised = True
+        load_dotenv()
 
-    plant_collection = get_plant_collection(df)
-    while True:
-        print("Loading a minute's worth of data...")
-        df = pd.concat([df, load_data(conn, 1)])
+        st.session_state.conn = get_db_connection(ENV)
+        st.session_state.df = load_data(st.session_state.conn, 1440)
+        st.session_state.plant_collection = get_plant_collection(
+            st.session_state.df)
 
-        update_plant_collection(plant_collection, df)
+    st_autorefresh(interval=60000, key='refresh')
 
-        display_dashboard(df, plant_collection)
-        
-        sleep(60)
+    display_dashboard(st.session_state.df, st.session_state.plant_collection)
+
+    st.session_state.df = pd.concat(
+        [st.session_state.df, load_data(st.session_state.conn, 1)])
+
+    st.session_state.df = st.session_state.df[st.session_state.df["recording_taken"] > datetime.now(
+    ) - timedelta(hours=1)]
+
+    update_plant_collection(
+        st.session_state.plant_collection, st.session_state.df)
