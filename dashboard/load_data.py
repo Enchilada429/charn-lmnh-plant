@@ -32,15 +32,14 @@ def get_db_connection(_config: _Environ) -> Connection:
     return conn
 
 
-@st.cache_data
-def load_data(_conn: Connection) -> pd.DataFrame:
-    """This loads the cleaned plant recording data. This is a static version of the RDS data that will be used."""
-    query = """
+def load_data(conn: Connection, past_mins: int) -> pd.DataFrame:
+    """This loads the cleaned plant recording data."""
+    query = f"""
         SELECT r.plant_id, p.common_name, recording_taken, temperature, soil_moisture 
         FROM beta.recording r JOIN beta.plant p
         ON (r.plant_id=p.plant_id)
-        WHERE recording_taken >= DATEADD(hour, -24, GETDATE())
+        WHERE recording_taken >= DATEADD(minute, {-1 * past_mins}, GETDATE())
         ORDER BY recording_taken;
         """
-    df = pd.read_sql_query(query, _conn)
+    df = pd.read_sql_query(query, conn)
     return df

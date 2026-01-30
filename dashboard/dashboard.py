@@ -1,6 +1,7 @@
 """Script for hosting the dashboard for the past 24 hours of data."""
 
 from os import environ as ENV
+from datetime import datetime, timedelta
 
 import pandas as pd
 import streamlit as st
@@ -65,8 +66,6 @@ def update_plant_collection(plant_collection: Plants, plant_recordings: pd.DataF
 
 def display_dashboard(plant_recordings: pd.DataFrame, plant_collection: Plants):
     """Outputs the main visualisations of the dashboard."""
-
-    st.error("Error!")
 
     top_5_temp = plant_recordings.nlargest(5, "temperature")
     bottom_5_temp = plant_recordings.nsmallest(5, "temperature")
@@ -141,18 +140,25 @@ def display_dashboard(plant_recordings: pd.DataFrame, plant_collection: Plants):
 
 
 if __name__ == '__main__':
-    load_dotenv()
 
-    conn = get_db_connection(ENV)
+    if "initialised" not in st.session_state:
+        st.session_state.initialised = True
+        load_dotenv()
 
-    df = load_data(conn)
-
-    plant_collection = get_plant_collection(df)
+        st.session_state.conn = get_db_connection(ENV)
+        st.session_state.df = load_data(st.session_state.conn, 1440)
+        st.session_state.plant_collection = get_plant_collection(
+            st.session_state.df)
 
     st_autorefresh(interval=60000, key='refresh')
 
-    df = load_data(conn)
+    display_dashboard(st.session_state.df, st.session_state.plant_collection)
 
-    update_plant_collection(plant_collection, df)
+    st.session_state.df = pd.concat(
+        [st.session_state.df, load_data(st.session_state.conn, 1)])
 
-    display_dashboard(df, plant_collection)
+    st.session_state.df = st.session_state.df[st.session_state.df["recording_taken"] > datetime.now(
+    ) - timedelta(day=1)]
+
+    update_plant_collection(
+        st.session_state.plant_collection, st.session_state.df)
