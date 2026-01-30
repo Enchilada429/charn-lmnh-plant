@@ -158,7 +158,7 @@ if __name__ == '__main__':
         [st.session_state.df, load_data(st.session_state.conn, 1)])
 
     st.session_state.df = st.session_state.df[st.session_state.df["recording_taken"] > datetime.now(
-    ) - timedelta(day=1)]
+    ) - timedelta(days=1)]
 
     update_plant_collection(
         st.session_state.plant_collection, st.session_state.df)
