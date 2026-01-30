@@ -2,7 +2,6 @@
 on the dashboard."""
 
 import logging
-from os import environ as ENV
 from os import _Environ
 
 import pandas as pd
@@ -13,6 +12,7 @@ from dotenv import load_dotenv
 logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
+
 
 @st.cache_resource
 def get_db_connection(_config: _Environ) -> Connection:
@@ -33,14 +33,14 @@ def get_db_connection(_config: _Environ) -> Connection:
 
 
 @st.cache_data
-def load_data() -> pd.DataFrame:
+def load_data(_conn: Connection) -> pd.DataFrame:
     """This loads the cleaned plant recording data. This is a static version of the RDS data that will be used."""
-    conn = get_db_connection(ENV)
     query = """
         SELECT r.plant_id, p.common_name, recording_taken, temperature, soil_moisture 
         FROM beta.recording r JOIN beta.plant p
         ON (r.plant_id=p.plant_id)
+        WHERE recording_taken >= DATEADD(hour, -24, GETDATE())
         ORDER BY recording_taken;
         """
-    df = pd.read_sql_query(query, conn)
+    df = pd.read_sql_query(query, _conn)
     return df

@@ -1,11 +1,16 @@
 """This script will have the base figures to be plotted and then displayed on the dashboard."""
 
+from os import environ as ENV
+
+from dotenv import load_dotenv
 import pandas as pd
 import altair as alt
 
-from load_data import load_data
+from load_data import get_db_connection, load_data
 
-df = load_data()
+load_dotenv()
+df = load_data(get_db_connection(ENV))
+
 
 def bar_chart(data, x_col, y_col, title):
     return (

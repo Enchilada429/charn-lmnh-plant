@@ -1,25 +1,77 @@
 """Script for hosting the dashboard for the past 24 hours of data."""
 
+from os import environ as ENV
+
 import pandas as pd
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 from dotenv import load_dotenv
 
-from load_data import load_data
+from load_data import get_db_connection, load_data
 from charts import bar_chart, plot_temp_over_time, plot_moisture_over_time
+from classes import Plants, Plant, Botanist, Origin, Image
 
 
-def display_dashboard():
+def get_latest_recording_for_plant(plant_recordings: pd.DataFrame, plant_name: str) -> dict:
+    """Returns a dict for the latest recording for the plant."""
+
+    plant_df = plant_recordings[plant_recordings["common_name"] == plant_name]
+    plant_df = plant_df.sort_values(
+        by=["recording_taken"], ascending=False)
+
+    latest_row = plant_df.head(1)
+
+    return {
+        "common_name": latest_row.iloc[0]["common_name"],
+        "soil_moisture": latest_row.iloc[0]["soil_moisture"],
+        "temperature": latest_row.iloc[0]["temperature"],
+        "recording_taken": latest_row.iloc[0]["recording_taken"]
+    }
+
+
+def get_plant_collection(plant_recordings: pd.DataFrame) -> Plants:
+    """Returns a Plants object which is a collection of plants
+    based on the plants information extracted from the data."""
+
+    plant_collection = Plants()
+
+    for plant_name in plant_recordings["common_name"].dropna().unique():
+        latest_recording = get_latest_recording_for_plant(
+            plant_recordings, plant_name)
+
+        plant_collection.add_plant(
+            Plant(
+                common_name=latest_recording["common_name"],
+                soil_moisture=latest_recording["soil_moisture"],
+                temperature=latest_recording["temperature"],
+                recording_taken=latest_recording["recording_taken"]
+            )
+        )
+
+    return plant_collection
+
+
+def update_plant_collection(plant_collection: Plants, plant_recordings: pd.DataFrame) -> None:
+    """Updates fields in the plant collection based on new data."""
+
+    for plant in plant_collection.plants:
+        latest_recording = get_latest_recording_for_plant(
+            plant_recordings, plant.common_name)
+
+        plant.soil_moisture = latest_recording["soil_moisture"]
+        plant.temperature = latest_recording["temperature"]
+        plant.recording_taken = latest_recording["recording_taken"]
+
+
+def display_dashboard(plant_recordings: pd.DataFrame, plant_collection: Plants):
     """Outputs the main visualisations of the dashboard."""
-    load_dotenv()
-    plant_recordings = load_data()
-    
+
+    st.error("Error!")
+
     top_5_temp = plant_recordings.nlargest(5, "temperature")
     bottom_5_temp = plant_recordings.nsmallest(5, "temperature")
     top_5_moist = plant_recordings.nlargest(5, "soil_moisture")
     bottom_5_moist = plant_recordings.nsmallest(5, "soil_moisture")
-
-    st_autorefresh(interval=5000, key='refresh')
 
     st.set_page_config(
         page_title="LMNH Plant Monitor",
@@ -35,21 +87,25 @@ def display_dashboard():
     with col1:
         st.subheader("Temperature Extremes")
         st.altair_chart(
-            bar_chart(top_5_temp, "temperature", "common_name", "Highest Temperatures")
+            bar_chart(top_5_temp, "temperature",
+                      "common_name", "Highest Temperatures")
         )
 
         st.altair_chart(
-            bar_chart(bottom_5_temp, "temperature", "common_name", "Lowest Temperatures")
+            bar_chart(bottom_5_temp, "temperature",
+                      "common_name", "Lowest Temperatures")
         )
 
     with col2:
         st.subheader("Soil Moisture Extremes")
         st.altair_chart(
-            bar_chart(top_5_moist, "soil_moisture", "common_name", "Highest Soil Moisture")
+            bar_chart(top_5_moist, "soil_moisture",
+                      "common_name", "Highest Soil Moisture")
         )
 
         st.altair_chart(
-            bar_chart(bottom_5_moist, "soil_moisture", "common_name", "Lowest Soil Moisture")
+            bar_chart(bottom_5_moist, "soil_moisture",
+                      "common_name", "Lowest Soil Moisture")
         )
     st.divider()
 
@@ -58,8 +114,9 @@ def display_dashboard():
         "Select a plant",
         sorted(plant_recordings["common_name"].dropna().unique())
     )
-    plant_df = plant_recordings[plant_recordings["common_name"] == plant].sort_values("recording_taken")
-    
+    plant_df = plant_recordings[plant_recordings["common_name"] == plant].sort_values(
+        "recording_taken")
+
     st.subheader(f"📈 {plant} – Last 24 Hours")
 
     st.divider()
@@ -69,11 +126,33 @@ def display_dashboard():
             plot_temp_over_time(plant_df)
         )
 
+        plant_obj = plant_collection.get_plant(plant)
+
+        st.info(f"Current temperature: {plant_obj.temperature:.2f} ºC")
+        st.info(f"Recording taken: {plant_obj.recording_taken}")
+        st.info(f"Last watered: {plant_obj.recording_taken}")
+
     with col2:
         st.altair_chart(
             plot_moisture_over_time(plant_df)
         )
 
+        st.info(f"Current soil moisture: {plant_obj.soil_moisture:.2f} ml")
+
+
 if __name__ == '__main__':
     load_dotenv()
-    display_dashboard()
+
+    conn = get_db_connection(ENV)
+
+    df = load_data(conn)
+
+    plant_collection = get_plant_collection(df)
+
+    st_autorefresh(interval=60000, key='refresh')
+
+    df = load_data(conn)
+
+    update_plant_collection(plant_collection, df)
+
+    display_dashboard(df, plant_collection)
