@@ -27,7 +27,7 @@ def display_archive_page() -> None:
         st.info("No CSV files found.")
     else:
         for csv in csv_files:
-            url = generate_object_url(s3, bucket, csv)
+            url = generate_object_url(bucket, csv)
             st.markdown(f"📄 **{csv}** [⬇️ Download]({url})")
 
 

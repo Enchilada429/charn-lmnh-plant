@@ -9,7 +9,7 @@ import altair as alt
 from load_data import get_db_connection, load_data
 
 load_dotenv()
-df = load_data(get_db_connection(ENV))
+df = load_data(get_db_connection(ENV), 1440)
 
 
 def bar_chart(data, x_col, y_col, title):

@@ -1,6 +1,7 @@
 """Script for hosting the dashboard for the past 24 hours of data."""
 
 from os import environ as ENV
+from time import sleep
 
 import pandas as pd
 import streamlit as st
@@ -88,7 +89,7 @@ def display_dashboard(plant_recordings: pd.DataFrame, plant_collection: Plants):
         st.subheader("Temperature Extremes")
         st.altair_chart(
             bar_chart(top_5_temp, "temperature",
-                      "common_name", "Highest Temperatures")
+                       "common_name", "Highest Temperatures")
         )
 
         st.altair_chart(
@@ -144,15 +145,16 @@ if __name__ == '__main__':
     load_dotenv()
 
     conn = get_db_connection(ENV)
-
-    df = load_data(conn)
+    print("Loading entire dataset...")
+    df = load_data(conn, 1440)
 
     plant_collection = get_plant_collection(df)
+    while True:
+        print("Loading a minute's worth of data...")
+        df = pd.concat([df, load_data(conn, 1)])
 
-    st_autorefresh(interval=60000, key='refresh')
+        update_plant_collection(plant_collection, df)
 
-    df = load_data(conn)
-
-    update_plant_collection(plant_collection, df)
-
-    display_dashboard(df, plant_collection)
+        display_dashboard(df, plant_collection)
+        
+        sleep(60)
