@@ -13,8 +13,6 @@ def display_dashboard():
     """Outputs the main visualisations of the dashboard."""
     load_dotenv()
     plant_recordings = load_data()
-
-    st.error("Error!")
     
     top_5_temp = plant_recordings.nlargest(5, "temperature")
     bottom_5_temp = plant_recordings.nsmallest(5, "temperature")
