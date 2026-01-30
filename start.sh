@@ -21,9 +21,9 @@ terraform init
 
 log "🌱 Applying ECR repositories only..."
 terraform apply -auto-approve \
-    -target=aws_ecr_repository.c21-charn-pipeline-ecr \
-    -target=aws_ecr_repository.c21-charn-dashboard-ecr \
-    -target=aws_ecr_repository.c21-charn-archive-ecr
+    -target=aws_ecr_repository.charn-pipeline-ecr \
+    -target=aws_ecr_repository.charn-dashboard-ecr \
+    -target=aws_ecr_repository.charn-archive-ecr
 
 cd ..
 
