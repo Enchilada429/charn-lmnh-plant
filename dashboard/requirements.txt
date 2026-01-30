@@ -8,3 +8,4 @@ pyodbc
 python-dotenv
 boto3
 mypy-boto3-s3
+connectorx
