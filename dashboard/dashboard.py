@@ -1,6 +1,5 @@
 """Script for hosting the dashboard for the past 24 hours of data."""
 
-from os import environ as ENV
 from datetime import datetime, timedelta
 
 import pandas as pd
@@ -8,9 +7,9 @@ import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 from dotenv import load_dotenv
 
-from load_data import get_db_connection, load_data
+from load_data import load_data
 from charts import bar_chart, plot_temp_over_time, plot_moisture_over_time
-from classes import Plants, Plant, Botanist, Origin, Image
+from classes import Plants, Plant
 
 
 def get_latest_recording_for_plant(plant_recordings: pd.DataFrame, plant_name: str) -> dict:
@@ -129,7 +128,6 @@ def display_dashboard(plant_recordings: pd.DataFrame, plant_collection: Plants):
 
         st.info(f"Current temperature: {plant_obj.temperature:.2f} ºC")
         st.info(f"Recording taken: {plant_obj.recording_taken}")
-        st.info(f"Last watered: {plant_obj.last_watered}")
 
     with col2:
         st.altair_chart(
@@ -145,8 +143,7 @@ if __name__ == '__main__':
         st.session_state.initialised = True
         load_dotenv()
 
-        st.session_state.conn = get_db_connection(ENV)
-        st.session_state.df = load_data(st.session_state.conn, 1440)
+        st.session_state.df = load_data(1440)
         st.session_state.plant_collection = get_plant_collection(
             st.session_state.df)
 
@@ -155,7 +152,7 @@ if __name__ == '__main__':
     display_dashboard(st.session_state.df, st.session_state.plant_collection)
 
     st.session_state.df = pd.concat(
-        [st.session_state.df, load_data(st.session_state.conn, 1)])
+        [st.session_state.df, load_data(1)])
 
     st.session_state.df = st.session_state.df[st.session_state.df["recording_taken"] > datetime.now(
     ) - timedelta(days=1)]
