@@ -17,6 +17,8 @@ COPY load_s3_data.py .
 
 COPY charts.py .
 
+COPY classes.py .
+
 COPY dashboard.py .
 
 COPY pages/ pages/
