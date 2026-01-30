@@ -41,3 +41,7 @@ variable "DB_PASSWORD" {
 variable "S3_BUCKET" {
   type = string
 }
+
+variable "AWS_ACCOUNT_ID" {
+  type = string
+}

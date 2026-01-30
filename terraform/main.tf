@@ -111,7 +111,9 @@ resource "aws_lb" "c21-charn-ecs-load-balancer" {
   load_balancer_type = "application"
   subnets = data.aws_subnets.public-subnets.ids
   
-  
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # listener for load balancer
@@ -122,8 +124,10 @@ resource "aws_lb_listener" "c21-charn-lb-listener" {
 
   default_action {
     type = "forward"
-    target_group_arn = aws_lb_target_group.c21-charn-target-group.id
+    target_group_arn = aws_lb_target_group.c21-charn-target-group.arn
   }
+
+  depends_on = [ aws_lb.c21-charn-ecs-load-balancer, aws_lb_target_group.c21-charn-target-group ]
 }
 ##################################################### 
 
@@ -167,9 +171,9 @@ data "aws_iam_policy_document" "lambda-role-permissions-policy-doc-pipeline" {
       "logs:CreateLogStream",
       "logs:PutLogEvents",
     ]
-    resources = ["arn:aws:logs:eu-west-2:129033205317:*"]
+    resources = ["arn:aws:logs:eu-west-2:${var.AWS_ACCOUNT_ID}:*"]
   }
-
+  
   statement {
     effect = "Allow"
     actions = [
@@ -232,16 +236,31 @@ data "aws_iam_policy_document" "ecs-role-permissions-policy-doc-dashboard" {
 # Permissions policy
 resource "aws_iam_policy" "lambda-role-permissions-policy-pipeline" {
   name   = "c21-charn-pipeline-permissions-policy"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
   policy = data.aws_iam_policy_document.lambda-role-permissions-policy-doc-pipeline.json
 }
 
 resource "aws_iam_policy" "lambda-role-permissions-policy-archive" {
   name   = "c21-charn-archive-permissions-policy"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
   policy = data.aws_iam_policy_document.lambda-role-permissions-policy-doc-archive.json
 }
 
 resource "aws_iam_policy" "task-definition-role-permissions-policy-dashboard" {
   name   = "c21-charn-dashboard-permissions-policy"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
   policy = data.aws_iam_policy_document.ecs-role-permissions-policy-doc-dashboard.json
 }
 ################################################ 
@@ -252,18 +271,32 @@ resource "aws_iam_policy" "task-definition-role-permissions-policy-dashboard" {
 # minutely pipeline lambda role
 resource "aws_iam_role" "lambda-minute-role" {
   name               = "c21-charn-pipeline-lambda-role"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
   assume_role_policy = data.aws_iam_policy_document.lambda-role-trust-policy-doc.json
 }
 
 # daily archive lambda role
 resource "aws_iam_role" "lambda-daily-role" {
   name               = "c21-charn-archive-lambda-role"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
   assume_role_policy = data.aws_iam_policy_document.lambda-role-trust-policy-doc.json
 }
 
 # eventbridge minutely pipeline scheduler role
 resource "aws_iam_role" "eventbridge-pipeline-scheduler-role" {
   name = "c21-charn-pipeline-scheduler-role"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -281,6 +314,10 @@ resource "aws_iam_role" "eventbridge-pipeline-scheduler-role" {
 resource "aws_iam_role" "eventbridge-archive-scheduler-role" {
   name = "c21-charn-archive-scheduler-role"
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -297,6 +334,10 @@ resource "aws_iam_role" "eventbridge-archive-scheduler-role" {
 resource "aws_iam_role" "ecs-execution-dashboard-role" {
   name = "c21-charn-ecs-execution-dashboard-role"
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -312,6 +353,10 @@ resource "aws_iam_role" "ecs-execution-dashboard-role" {
 # ecs task definition role
 resource "aws_iam_role" "ecs-task-definition-role-dashboard" {
   name = "c21-charn-ecs-task-definition-role-dashboard"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -466,6 +511,17 @@ resource "aws_ecs_service" "ecs-dashboard-service" {
   deployment_minimum_healthy_percent = 0
   depends_on                         = [aws_lb_listener.c21-charn-lb-listener]
 
+  force_delete = true
+
+  lifecycle {
+    ignore_changes = [
+      desired_count,
+      network_configuration,
+      load_balancer,
+      task_definition
+    ]
+  }
+
   load_balancer {
     target_group_arn = aws_lb_target_group.c21-charn-target-group.arn
     container_name = "c21-charn-dashboard-container"
@@ -577,6 +633,19 @@ resource "aws_s3_bucket" "c21-charn-archive-bucket" {
 #################################################
 
 
+################### s3 Bucket Public Access Block ###################
+
+resource "aws_s3_bucket_public_access_block" "c21-charn-archive-bucket-block" {
+    bucket = aws_s3_bucket.c21-charn-archive-bucket.id
+
+    block_public_acls = false
+    block_public_policy = false
+    ignore_public_acls = false
+    restrict_public_buckets = false
+}
+#####################################################################
+
+
 ################### s3 Bucket Policy ###################
 
 resource "aws_s3_bucket_policy" "c21-charn-public-bucket-policy" {
@@ -595,18 +664,9 @@ resource "aws_s3_bucket_policy" "c21-charn-public-bucket-policy" {
     }
     ]
   })
+
+  depends_on = [ aws_s3_bucket_public_access_block.c21-charn-archive-bucket-block ]
 }
 ########################################################
 
 
-################### s3 Bucket Public Access Block ###################
-
-resource "aws_s3_bucket_public_access_block" "c21-charn-archive-bucket-block" {
-    bucket = aws_s3_bucket.c21-charn-archive-bucket.id
-
-    block_public_acls = false
-    block_public_policy = false
-    ignore_public_acls = false
-    restrict_public_buckets = false
-}
-#####################################################################

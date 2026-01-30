@@ -19,6 +19,6 @@ COPY charts.py .
 
 COPY dashboard.py .
 
-COPY pages/archive_page.py .
+COPY pages/ pages/
 
 CMD ["streamlit", "run", "dashboard.py"]
