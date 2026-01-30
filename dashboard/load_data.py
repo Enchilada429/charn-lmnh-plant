@@ -14,6 +14,7 @@ logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
 
+
 @st.cache_resource
 def get_db_connection(_config: _Environ) -> Connection:
     """Create and return a SQL Server connection."""

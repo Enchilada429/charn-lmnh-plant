@@ -1,4 +1,4 @@
-"""Script which creates classes for plant information and more."""
+"""Script which creates classes for plant information."""
 
 from datetime import datetime
 
@@ -6,9 +6,18 @@ from datetime import datetime
 class Plants:
     """Class for a collection of plants."""
 
-    def __init__(self, plants: list[Plant]):
+    def __init__(self, plants: list[Plant] = []):
         """Initialises the collection of plants."""
         self.plants = plants
+
+    def get_plant(self, common_name: str) -> Plant:
+        """Returns a plant based on its common name. Returns None if not found."""
+
+        for plant in self.plants:
+            if plant.common_name == common_name:
+                return plant
+
+        return None
 
     def add_plant(self, plant: Plant) -> None:
         """Adds a plant to the collection of plants."""
@@ -26,16 +35,26 @@ class Plant:
 
     def __init__(self,
                  common_name: str,
+                 botanist: Botanist = None,
+                 origin: Origin = None,
+                 image: Image = None,
                  scientific_name: str = None,
                  soil_moisture: float = None,
                  temperature: float = None,
-                 last_watered: datetime = None):
+                 last_watered: datetime = None,
+                 recording_taken: datetime = None):
         """Initialises plant information."""
+
         self.common_name = common_name
+        self.botanist = botanist
+        self.origin = origin
+
+        self.image = image
         self.scientific_name = scientific_name
         self.soil_moisture = soil_moisture
         self.temperature = temperature
         self.last_watered = last_watered
+        self.recording_taken = recording_taken
 
 
 class Botanist:
